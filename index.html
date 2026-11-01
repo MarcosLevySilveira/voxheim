@@ -338,6 +338,12 @@ header{display:flex;align-items:center;gap:12px;border:1px solid var(--gold);pad
 .rd-pick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 10px}.rd-pick button{min-height:46px;background:var(--slab);border:1px solid var(--line);color:var(--bone);font-weight:600}
 .rd-pick button[data-l]{border-left:4px solid var(--lc,var(--ash))}.rd-pick button[aria-pressed="true"]{background:var(--gold-soft);border-color:var(--gold);color:var(--gold)}.rd-pick button[data-l="0"]{grid-column:1/-1;font-weight:500;color:var(--ash)}
 .mv-grow{margin:6px 0 8px;padding:8px 10px;background:var(--gold-soft);border:1px solid rgba(201,164,92,.4)}.mv-grow b{display:block;color:var(--gold);font-size:15px}.mv-grow span{color:var(--ash);font-size:12px}
+.atlas-svg .at-land{cursor:pointer}.atlas-svg .at-land:focus{outline:none}.atlas-svg .at-land.locked{opacity:.92}
+.at-lb{font-family:var(--display);font-size:12.5px;fill:#f6ecd4;paint-order:stroke;stroke:#0a0d14;stroke-width:3px}.at-lb.sm{font-size:10px}
+.at-land.locked .at-lb{fill:#b4adc0}.at-lv{font-size:8.5px;letter-spacing:.12em;fill:#C9A45C;paint-order:stroke;stroke:#0a0d14;stroke-width:3px;text-transform:uppercase}
+.at-me{font-family:var(--body);font-size:9px;font-weight:700;fill:#f6e2a6;paint-order:stroke;stroke:#0a0d14;stroke-width:3px}
+.at-chips{display:flex;flex-wrap:wrap;gap:6px}.at-chips span{font-size:12px;padding:4px 8px;border:1px solid var(--line);background:var(--slab)}
+.at-prog{height:6px;background:var(--line)}.at-prog i{display:block;height:100%;background:var(--gold)}.at-gate{color:var(--gold)!important}
 .recov{position:fixed;inset:0;z-index:48;display:grid;place-items:center;background:radial-gradient(circle at 50% 30%,rgba(60,40,18,.97),rgba(0,0,0,.99) 72%);padding:16px;overflow:auto}
 .rec-card{width:100%;max-width:420px;background:var(--stone);border:1px solid var(--gold);padding:20px 18px;box-shadow:0 0 60px rgba(201,164,92,.18)}
 .rec-k{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
@@ -532,6 +538,16 @@ details ul{margin:8px 0 0;padding-left:18px;font-size:13.5px;display:flex;flex-d
   </section>
 
   <!-- MAP -->
+  <section id="atlas" hidden aria-labelledby="atlas-h" style="display:flex;flex-direction:column;gap:12px">
+    <div class="panel board-panel">
+      <div class="label">O mundo inteiro · do A1 ao C2</div>
+      <h2 id="atlas-h" class="display" style="margin:2px 0 4px;font-size:26px">O Atlas de Voxheim</h2>
+      <div class="board-status" id="atlas-status"></div>
+      <svg class="board-svg atlas-svg" viewBox="0 0 360 520" id="atlas-art"></svg>
+    </div>
+    <div class="panel space-detail" id="atlas-detail" aria-live="polite"></div>
+    <button type="button" class="ghost" id="atlas-back">Voltar e mudar o grupo</button>
+  </section>
   <section id="map" hidden aria-labelledby="map-h" style="display:flex;flex-direction:column;gap:12px">
     <div class="panel board-panel">
       <div class="label">A Saga de Voxheim · toquem os sete sinos</div>
@@ -541,6 +557,7 @@ details ul{margin:8px 0 0;padding-left:18px;font-size:13.5px;display:flex;flex-d
     </div>
     <div class="panel space-detail" id="space-detail" aria-live="polite"></div>
     <button type="button" class="primary" id="j-open" hidden>Ver a jornada dos alunos</button>
+    <button type="button" class="ghost" id="to-atlas">Abrir o Atlas do mundo</button>
     <button type="button" class="ghost" id="back-setup">Voltar e mudar o grupo</button>
     <div class="map-btns"><button type="button" class="ghost" id="g-open" hidden>Grimório de runas</button><button type="button" class="ghost" id="chron-open" hidden>Crônica da Guilda</button></div>
     <button type="button" class="ghost" id="saga-open">Rever a saga</button>
@@ -1514,8 +1531,12 @@ const TOURS={
   {el:"#heroes",t:"Monte a guilda",d:"Escreva o nome de cada jogador e escolha a classe. Cada classe tem um poder especial, que carrega com as falas certas."},
   {el:".camp-bar",t:"A sua campanha",d:"O progresso fica salvo aqui. Em Campanhas, vocês criam outra jornada ou recomeçam do zero."},
   {el:"#to-map",t:"Tudo pronto?",d:"Toque aqui para entrar no reino.",tap:true}],
+ atlas:[
+  {el:"#atlas-art",t:"O Atlas de Voxheim",d:"Este é o mundo inteiro: 5 continentes, do A1 ao C2, e 6 ilhas para explorar. Os que estão sob a névoa abrem conforme a guilda avança."},
+  {el:"#atlas-art .at-here",t:"Vocês estão aqui",d:"A jornada começa no Reino de Voxheim. Toquem em qualquer terra do mapa para ver o que se aprende lá."},
+  {el:"#atlas-enter",t:"Hora de entrar",d:"Toquem aqui para abrir o mapa do Reino e começar.",tap:true}],
  map:[
-  {el:"#board-art",t:"O mapa do reino",d:"São 7 regiões. Cada uma tem chefões e um sino. Vencendo todos os chefões, o sino toca e a próxima região se abre."},
+  {el:"#board-art",t:"O mapa do Reino",d:"Dentro do Reino, são 7 regiões. Cada uma tem chefões e um sino. Vencendo todos os chefões, o sino toca e a próxima região se abre."},
   {el:()=>document.querySelector("#board-art .rg.sel")||document.querySelector("#board-art .rg"),t:"Comecem por aqui",d:"Toque numa região para ver os chefões dela. A primeira já está aberta.",tap:true},
   {el:"#g-open",t:"Runas e Crônica",d:"Cada frase praticada vira uma runa no Grimório, e a Crônica conta a história da guilda. Depois da primeira batalha, aparece também a Jornada, com o que cada um aprendeu."}],
  region:[
@@ -1579,6 +1600,98 @@ function runTour(name){
   addEventListener("resize",place); show();
 }
 
+/* ---------- the Atlas: the whole world, A1 to C2, with side islands; Book I is the open realm ---------- */
+const WORLD=[
+ {id:"reino",kind:"book",book:"Livro I",n:"Reino de Voxheim",lvl:"A1–A2",x:92,y:404,r:62,seed:3,col:"#c98a5a",lm:"castle",open:true,
+  stolen:"as palavras",d:"Onde tudo começou. Sete regiões, sete sinos, e o Grande Silêncio no alto da Torre do Eco.",
+  learn:["Primeiras palavras","am / is / are","there is, have, números","Present continuous","Present simple","Past simple","Futuro e can"]},
+ {id:"mares",kind:"book",gate:"Abre ao completar o Livro I",book:"Livro II",n:"Arquipélago das Marés",lvl:"B1",x:262,y:356,r:30,seed:7,col:"#5fb2c8",lm:"lighthouse",
+  stolen:"as pontes entre o ontem e o agora",d:"Ilhas ligadas por pontes que o Silêncio quebrou. Só quem liga o passado ao presente atravessa as marés.",
+  learn:["Present perfect","Past continuous","Comparativos e superlativos","should, must, have to","First conditional","Phrasal verbs do dia a dia","Relative clauses"]},
+ {id:"cordilheira",kind:"book",gate:"Abre ao completar o Livro II",book:"Livro III",n:"Cordilheira das Vozes Partidas",lvl:"B2",x:96,y:236,r:56,seed:11,col:"#9a8fb8",lm:"mountains",
+  stolen:"as opiniões",d:"Nas montanhas, todos só repetem o que ouvem. O eco engoliu as opiniões. Aqui se aprende a discordar, argumentar e defender uma ideia.",
+  learn:["Second e third conditional","Voz passiva","Reported speech","Dar e defender opinião","Conectores de argumento","Used to, would","Narrar com detalhes"]},
+ {id:"espelhos",kind:"book",gate:"Abre ao completar o Livro III",book:"Livro IV",n:"Cidade dos Mil Espelhos",lvl:"C1",x:270,y:178,r:52,seed:5,col:"#c8d4e6",lm:"spires",
+  stolen:"a nuance",d:"Uma cidade de vidro onde tudo virou literal. Piadas não têm graça, metáforas quebram. A voz precisa de nuance para refletir.",
+  learn:["Expressões idiomáticas","Formal e informal","Debate e negociação","Contar histórias","Hedging: suavizar e enfatizar","Inversão e ênfase","Escuta de sotaques"]},
+ {id:"ceu",kind:"book",gate:"Abre ao completar o Livro IV",book:"Livro V",n:"Céu de Lyra",lvl:"C2",x:180,y:70,r:46,seed:2,col:"#f2c46a",lm:"sky",
+  stolen:"a própria voz",d:"A ilha que flutua acima das nuvens, onde Lyra aprendeu a cantar. O último chefão tem a sua voz do primeiro dia.",
+  learn:["Ironia e humor","Persuasão","Improviso","Registro de nativo","Discurso público","Sutileza cultural","A sua voz"]},
+ {id:"porto",kind:"isle",n:"Porto dos Viajantes",lvl:"A2+",x:200,y:474,r:18,seed:13,col:"#e0a050",icon:"anchor",gate:"Abre com o sino do Mercado das Horas",d:"Inglês de viagem: aeroporto, hotel, restaurante, pedir direções e resolver imprevistos.",learn:["Aeroporto e imigração","Hotel","Restaurante","Direções","Emergências"]},
+ {id:"taverna",kind:"isle",n:"Taverna do Corvo",lvl:"A2+",x:40,y:318,r:16,seed:17,col:"#c86a4a",icon:"mug",gate:"Abre com o sino da Vila da Rotina",d:"Conversa do dia a dia: small talk, gírias, reagir e manter a conversa viva.",learn:["Small talk","Reagir e concordar","Gírias comuns","Contar novidades"]},
+ {id:"pronuncia",kind:"isle",n:"Ilha da Pronúncia",lvl:"Todos",x:322,y:284,r:16,seed:19,col:"#6fdba0",icon:"shell",gate:"Abre com o sino do Vale dos Sussurros",d:"Os sons que travam o brasileiro: th, o -ed, vogais longas e curtas, o r e o ritmo da frase.",learn:["th","-ed","Vogais longas e curtas","Ritmo e entonação"]},
+ {id:"guilda",kind:"isle",n:"Guilda dos Ofícios",lvl:"B1+",x:318,y:446,r:18,seed:23,col:"#9fb0c8",icon:"gear",gate:"Abre no Livro II",d:"Inglês para o trabalho: apresentar-se, reuniões, entrevistas, ligações e apresentações.",learn:["Entrevista de emprego","Reuniões","Ligações","Apresentações"]},
+ {id:"biblioteca",kind:"isle",n:"Biblioteca Arcana",lvl:"Todos",x:40,y:152,r:16,seed:29,col:"#a98cf0",icon:"book",gate:"Abre com o sino do Forte de Pedra",d:"Masmorras de gramática por tópico, para revisar o que ficou fraco, no seu ritmo.",learn:["Revisão por unidade","Erros comuns do brasileiro","Desafios de gramática"]},
+ {id:"arena",kind:"isle",n:"Arena dos Ecos",lvl:"Todos",x:320,y:96,r:16,seed:31,col:"#C8464F",icon:"ring",gate:"Abre ao completar o Livro I",d:"Modo infinito e desafio da semana. Ondas de inimigos com tudo o que a guilda já aprendeu.",learn:["Modo infinito","Desafio da semana","Recordes da guilda"]}
+];
+const ROUTE=["reino","mares","cordilheira","espelhos","ceu"];
+let atSel="reino";
+function blob(cx,cy,r,seed,n){ n=n||9; let s=seed*9973, R=()=>{ s=(s*9301+49297)%233280; return s/233280; }; const pts=[];
+  for(let i=0;i<n;i++){ const a=i/n*Math.PI*2, rr=r*(.78+R()*.44); pts.push([cx+rr*Math.cos(a),cy+rr*.82*Math.sin(a)]); }
+  let d="M"+((pts[0][0]+pts[n-1][0])/2).toFixed(1)+" "+((pts[0][1]+pts[n-1][1])/2).toFixed(1);
+  for(let i=0;i<n;i++){ const p=pts[i], q=pts[(i+1)%n]; d+=" Q"+p[0].toFixed(1)+" "+p[1].toFixed(1)+" "+((p[0]+q[0])/2).toFixed(1)+" "+((p[1]+q[1])/2).toFixed(1); }
+  return d+"Z"; }
+function atlasLM(W,open){ const x=W.x,y=W.y, ink=open?"#2a1d14":"#3a3646", lit=open?"#f2c46a":"#6a6478";
+  if(W.lm==="castle") return '<g transform="translate('+(x-4)+' '+(y-30)+')"><path d="M-18 30V4h8v-8h6v8h8v-14l8-10 8 10v14h8V-4h6v8h8v26z" fill="'+ink+'"/><rect x="2" y="12" width="8" height="18" rx="4" fill="'+lit+'"/><path d="M6 -24 l-5 7 h10z" fill="'+lit+'"/></g>';
+  if(W.lm==="lighthouse") return '<g transform="translate('+x+' '+(y-24)+')"><path d="M-6 26 L-4 -4 h8 L6 26z" fill="'+ink+'"/><path d="M-4 6h8M-5 16h10" stroke="'+lit+'" stroke-width="2"/><rect x="-5" y="-10" width="10" height="6" fill="'+lit+'"/>'+(open?'<path d="M5 -7 L40 -16 L40 2z" fill="#fff3c2" opacity=".35"/>':'')+'</g>';
+  if(W.lm==="mountains") return '<g transform="translate('+x+' '+(y+10)+')"><path d="M-44 10 L-22 -30 L-8 -6 L8 -40 L30 10z" fill="'+ink+'"/><path d="M-22 -30 l-7 13 h14z M8 -40 l-9 16 h18z" fill="'+(open?"#f2ece0":"#7a7488")+'"/><path d="M16 10 L34 -18 L50 10z" fill="'+ink+'" opacity=".85"/></g>';
+  if(W.lm==="spires") return '<g transform="translate('+x+' '+(y+12)+')">'+[[-26,22],[-12,40],[2,30],[16,46],[30,24]].map(p=>'<path d="M'+p[0]+' 10 v-'+p[1]+' l5 -10 l5 10 v'+p[1]+'z" fill="'+ink+'"/><path d="M'+(p[0]+2)+' 6 v-'+(p[1]-8)+'" stroke="'+(open?"#e8f0ff":"#6a6478")+'" stroke-width="1.4" opacity=".7"/>').join("")+'</g>';
+  if(W.lm==="sky") return '<g transform="translate('+x+' '+(y+4)+')"><path d="M-30 6 Q0 34 30 6Z" fill="'+ink+'"/><path d="M-6 6 v-30 h12 v30z" fill="'+ink+'"/><path d="M0 -40 l3 7 7 1 -5 5 1 7 -6 -3 -6 3 1 -7 -5 -5 7 -1z" fill="'+lit+'"/></g>';
+  return ""; }
+function isleIcon(W,open){ const c=open?"#2a1d14":"#3a3646", x=W.x,y=W.y;
+  const P={anchor:'<path d="M0 -8v16M-6 2a6 6 0 0 0 12 0M-4 -6h8" stroke="'+c+'" stroke-width="2.4" fill="none" stroke-linecap="round"/>',
+    mug:'<path d="M-6 -6h9v12h-9z M3 -3h3a3 3 0 0 1 0 6h-3" stroke="'+c+'" stroke-width="2.2" fill="none"/>',
+    shell:'<path d="M0 0m-7 0a7 7 0 1 0 7 -7a4 4 0 1 0 4 4" stroke="'+c+'" stroke-width="2.2" fill="none"/>',
+    gear:'<circle r="4" fill="none" stroke="'+c+'" stroke-width="2.4"/><path d="M0 -8v3M0 5v3M-8 0h3M5 0h3M-6 -6l2 2M4 4l2 2M6 -6l-2 2M-4 4l-2 2" stroke="'+c+'" stroke-width="2.2"/>',
+    book:'<path d="M-7 -6h6a2 2 0 0 1 1 1v12a2 2 0 0 0-1-1h-6zM7 -6h-6M7 -6v12h-6" stroke="'+c+'" stroke-width="2" fill="none"/>',
+    ring:'<ellipse rx="8" ry="5" fill="none" stroke="'+c+'" stroke-width="2.4"/><path d="M-8 0v4M8 0v4M-8 4a8 5 0 0 0 16 0" stroke="'+c+'" stroke-width="2" fill="none"/>'};
+  return '<g transform="translate('+x+' '+y+')">'+(P[W.icon]||"")+'</g>'; }
+function worldOpen(W){ return !!W.open; }
+function paintAtlas(){
+  const svg=$("atlas-art"); const u="at"+(++UID); const bells=Object.keys(progress.bells||{}).length;
+  let h='<defs>'+rad(u+"sea","50%","55%","75%",[[0,"#1b3a52"],[.6,"#0f2234"],[1,"#070d16"]])+lin(u+"gd",[0,0],[1,1],GOLD)+
+    '<filter id="'+u+'fog" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="3" seed="6"><animate attributeName="baseFrequency" values=".035;.045;.035" dur="14s" repeatCount="indefinite"/></feTurbulence><feColorMatrix values="0 0 0 0 .75  0 0 0 0 .74  0 0 0 0 .82  0 0 0 1.1 -.35"/><feComposite in2="SourceGraphic" operator="in"/></filter>'+
+    '<pattern id="'+u+'wv" width="28" height="14" patternUnits="userSpaceOnUse"><path d="M0 10 q7 -6 14 0 t14 0" fill="none" stroke="#6fa8c8" stroke-width=".8" opacity=".25"/></pattern>'+glowDef(u+"gl",3)+'</defs>';
+  h+='<rect width="360" height="520" fill="url(#'+u+'sea)"/><rect width="360" height="520" fill="url(#'+u+'wv)"/>';
+  // voyage route
+  const R=ROUTE.map(id=>WORLD.find(w=>w.id===id)); let rd="M"+R[0].x+" "+R[0].y; for(let i=1;i<R.length;i++){ const a=R[i-1], b=R[i]; rd+=" Q"+((a.x+b.x)/2+(i%2?40:-40))+" "+((a.y+b.y)/2)+" "+b.x+" "+b.y; }
+  h+='<path d="'+rd+'" fill="none" stroke="#f2c46a" stroke-width="2" stroke-dasharray="2 7" stroke-linecap="round" opacity=".55"/>';
+  WORLD.forEach(W=>{ const op=worldOpen(W), sel=W.id===atSel, r=W.r;
+    h+='<g class="at-land'+(op?' open':' locked')+(sel?' sel':'')+'" data-w="'+W.id+'" tabindex="0" role="button" aria-label="'+esc(W.n+", "+W.lvl+(op?", aberto":", em breve"))+'">';
+    if(W.lm==="sky") h+='<ellipse cx="'+W.x+'" cy="'+(W.y+22)+'" rx="70" ry="14" fill="#e8e4f2" opacity="'+(op?.35:.15)+'"/>';
+    h+='<path d="'+blob(W.x,W.y,r+6,W.seed)+'" fill="'+(op?"#e8d6a8":"#2e2c3a")+'" opacity=".35"/>';
+    if(W.id==="mares"){ [[0,0,1],[-34,22,.6],[30,28,.55],[8,-34,.5]].forEach(p=>{ h+='<path d="'+blob(W.x+p[0],W.y+p[1],r*p[2],(W.seed+p[0])&255)+'" fill="'+(op?W.col:"#3a3846")+'"/>'; }); }
+    else h+='<path d="'+blob(W.x,W.y,r,W.seed)+'" fill="'+(op?W.col:"#34323f")+'"/>'+(op?'':'<path d="'+blob(W.x,W.y,r,W.seed)+'" fill="'+W.col+'" opacity=".3"/>');
+    if(W.kind==="book") h+=atlasLM(W,op); else h+=isleIcon(W,op);
+    if(!op) h+='<path d="'+blob(W.x,W.y,r+14,W.seed+1)+'" fill="#c8c4d6" filter="url(#'+u+'fog)" opacity=".7"/>';
+    if(sel) h+='<path d="'+blob(W.x,W.y,r+10,W.seed)+'" fill="none" stroke="url(#'+u+'gd)" stroke-width="2.5"><animate attributeName="stroke-opacity" values=".4;1;.4" dur="2s" repeatCount="indefinite"/></path>';
+    const ly=W.kind==="book"?W.y+r*.82+14:W.y+r+12;
+    const anc=W.kind==="isle"&&W.x<70?"start":W.kind==="isle"&&W.x>290?"end":"middle", tx=anc==="start"?W.x-r:anc==="end"?W.x+r:W.x;
+    h+='<text x="'+tx+'" y="'+ly+'" text-anchor="'+anc+'" class="at-lb'+(W.kind==="isle"?' sm':'')+'">'+esc(W.n)+'</text>';
+    if(W.kind==="book") h+='<text x="'+W.x+'" y="'+(ly+12)+'" text-anchor="middle" class="at-lv">'+esc(W.book+" · "+W.lvl)+'</text>';
+    if(!op&&W.kind==="book") h+='<g transform="translate('+(W.x+r*.7)+' '+(W.y-r*.55)+')"><circle r="9" fill="#14121c" stroke="#6a6478"/><path d="M-3 0v-2a3 3 0 0 1 6 0v2M-4 0h8v5h-8z" fill="none" stroke="#a69d8e" stroke-width="1.4"/></g>';
+    h+='</g>'; });
+  // you are here
+  const me=WORLD[0];
+  h+='<g class="at-here" transform="translate('+(me.x+30)+' '+(me.y-52)+')"><circle r="16" fill="#f2c46a" opacity=".25"><animate attributeName="r" values="10;20;10" dur="2s" repeatCount="indefinite"/></circle><path d="M0 12 C-9 0 -10 -4 -10 -8 a10 10 0 0 1 20 0 c0 4 -1 8 -10 20z" fill="url(#'+u+'gd)" filter="url(#'+u+'gl)"/><circle cy="-8" r="4" fill="#14121c"/><text x="14" y="-14" class="at-me">Você está aqui</text></g>';
+  // compass
+  h+='<g transform="translate(36 40)" opacity=".8"><circle r="20" fill="none" stroke="#C9A45C" stroke-width="1"/><path d="M0 -24 L5 0 L0 24 L-5 0Z" fill="#C9A45C"/><path d="M-24 0 L0 -4 L24 0 L0 4Z" fill="#C9A45C" opacity=".6"/><text y="-28" text-anchor="middle" class="at-lv">N</text></g>';
+  svg.innerHTML=h;
+  svg.querySelectorAll(".at-land").forEach(g=>{ const f=()=>{ atSel=g.dataset.w; sfx.pick(); paintAtlas(); }; g.onclick=f; g.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); f(); } }; });
+  $("atlas-status").innerHTML='<b>'+bells+' de 7</b> sinos do Reino tocando · 5 continentes · 6 ilhas';
+  paintAtlasDetail();
+}
+function paintAtlasDetail(){ const W=WORLD.find(w=>w.id===atSel), op=worldOpen(W), box=$("atlas-detail"), bells=Object.keys(progress.bells||{}).length;
+  let h='<div class="tag">'+esc(W.kind==="book"?W.book+" · "+W.lvl:"Ilha lateral · "+W.lvl)+(op?'':' · em breve')+'</div><h3 class="display">'+esc(W.n)+'</h3>';
+  if(W.stolen) h+='<p class="intro"><b>O Silêncio roubou '+esc(W.stolen)+'.</b> '+esc(W.d)+'</p>'; else h+='<p class="intro">'+esc(W.d)+'</p>';
+  h+='<div class="label" style="margin-top:4px">O que se aprende aqui</div><div class="at-chips">'+W.learn.map(x=>'<span>'+esc(x)+'</span>').join("")+'</div>';
+  if(op){ h+='<div class="at-prog"><i style="width:'+Math.round(bells/7*100)+'%"></i></div><p class="intro">'+bells+' de 7 sinos tocando.</p><button type="button" class="primary" id="atlas-enter">Entrar no '+esc(W.n)+'</button>'; }
+  else h+='<p class="intro at-gate">'+esc(W.gate||"")+'</p>';
+  box.innerHTML=h;
+  const b=$("atlas-enter"); if(b) b.onclick=()=>{ sfx.card(); paintMap(); show("map"); if(!chronShown && progress.chron && progress.chron.length){ chronShown=true; setTimeout(openChronicle,250); } };
+}
+function openAtlas(){ paintAtlas(); show("atlas"); }
+
 const CHAPTERS={
  c0:{short:"Capítulo 0",label:"Capítulo 0 · Primeiras palavras",title:"O primeiro sussurro",ladder:true,data:CH0,unit:["palavra","palavras"],desc:"Para quem começa do zero. Cada herói joga no próprio degrau: ouvir e tocar, repetir, escolher, lembrar e usar. O jogo guarda o progresso de cada aluno neste aparelho.",
   bosses:[{id:"sussurro",col:"#9fe3f2",act:"Prólogo",name:"O Sussurro",hp:90,every:3,art:artWhisper,pattern:["whisper","echo","chains","whisper","echo"],intro:"Shhh... no words for you.",lore:"Um fantasma que rouba as primeiras palavras de quem começa."}]},
@@ -1641,8 +1754,10 @@ document.querySelectorAll("#chapsel button").forEach(b=>b.onclick=()=>{ chapKey=
 paintSetup(); paintPhase(); paintChap();
 $("camp-open").onclick=()=>{ sfx.pick(); openSlots(); }; paintSlotBar(); tour("setup");
 { const _pr=paintRegion; paintRegion=function(){ _pr.apply(this,arguments); if(tutSeen().map&&!$("map").hidden&&document.querySelector("#space-detail [data-st]")) tour("region"); }; }
-function show(id){ ["setup","map","battle","journey","grimoire"].forEach(s=>$(s).hidden=s!==id); window.scrollTo(0,0); if(TOURS[id]) tour(id); }
-$("to-map").onclick=()=>{ ac(); if(!sagaSeen()) return openSaga(()=>{ paintMap(); show("map"); }); sfx.card(); paintMap(); show("map"); if(!chronShown && progress.chron && progress.chron.length){ chronShown=true; setTimeout(openChronicle,250); } };
+function show(id){ ["setup","atlas","map","battle","journey","grimoire"].forEach(s=>$(s).hidden=s!==id); window.scrollTo(0,0); if(TOURS[id]) tour(id); }
+$("to-map").onclick=()=>{ ac(); if(!sagaSeen()) return openSaga(()=>openAtlas()); sfx.card(); openAtlas(); };
+$("to-atlas").onclick=()=>{ sfx.card(); openAtlas(); };
+$("atlas-back").onclick=()=>show("setup");
 $("back-setup").onclick=()=>show("setup");
 
 /* ---------- map ---------- */
