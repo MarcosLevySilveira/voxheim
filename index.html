@@ -311,6 +311,13 @@ header{display:flex;align-items:center;gap:12px;border:1px solid var(--gold);pad
 .stage button{min-height:40px;padding:6px 12px;background:transparent;border:1px solid var(--gold);color:var(--gold);font-size:13px;font-weight:600}
 .stage.done{border-color:rgba(92,196,180,.6)}
 .stage.locked{opacity:.55}
+.camp-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);background:var(--slab);padding:10px 12px}
+.camp-bar b{display:block;font-family:var(--display);font-weight:400;font-size:19px}.camp-bar span{color:var(--ash);font-size:12px}.camp-bar button{min-height:44px;padding:0 14px;flex:none}
+.slot{border:1px solid var(--line);background:var(--slab);padding:10px 12px;margin:8px 0}.slot.cur{border-color:var(--gold)}
+.slot-h{display:flex;justify-content:space-between;align-items:center;gap:8px}.slot-h b{font-family:var(--display);font-weight:400;font-size:19px}
+.slot-tag{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}.slot-m{color:var(--ash);font-size:12.5px;margin:2px 0 4px}
+.ghost.danger{border-color:rgba(200,70,79,.6);color:#f0b4b8}
+.slot-new{display:flex;flex-direction:column;gap:8px;margin-top:6px}.slot-new input{min-height:46px;background:var(--void);border:1px solid var(--line);color:var(--bone);padding:0 12px;font:inherit}
 .recov{position:fixed;inset:0;z-index:48;display:grid;place-items:center;background:radial-gradient(circle at 50% 30%,rgba(60,40,18,.97),rgba(0,0,0,.99) 72%);padding:16px;overflow:auto}
 .rec-card{width:100%;max-width:420px;background:var(--stone);border:1px solid var(--gold);padding:20px 18px;box-shadow:0 0 60px rgba(201,164,92,.18)}
 .rec-k{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
@@ -458,6 +465,7 @@ details ul{margin:8px 0 0;padding-left:18px;font-size:13.5px;display:flex;flex-d
       <h2 id="setup-h" class="display" style="margin:0 0 4px;font-size:26px">Monte a sua guilda</h2>
       <p class="intro">Vocês são os <b>Vozeiros</b>, a última guilda capaz de quebrar o Grande Silêncio. <b>A turma inteira luta junta</b>: cada fala bem-sucedida fere o inimigo, e travar deixa o Silêncio mais forte. Ou todos vencem, ou todos recuam.</p>
     </div>
+    <div class="camp-bar"><div><div class="label">Campanha</div><b id="camp-name">Primeira campanha</b><span id="camp-meta"></span></div><button type="button" class="ghost" id="camp-open">Campanhas</button></div>
     <div id="chap-box" hidden>
       <div class="label" style="margin-bottom:6px">Capítulo</div>
       <div class="seg" id="chapsel" role="group" aria-label="Capítulo" style="grid-template-columns:1fr 1fr">
@@ -611,6 +619,51 @@ details ul{margin:8px 0 0;padding-left:18px;font-size:13.5px;display:flex;flex-d
 <script>
 (function(){
 "use strict";
+/* ---------- campaigns: separate save slots, each with its own progress, journey, runes and voices ---------- */
+const SLOT_KEYS=["vx-campaign","vx-chap","vx-journey","vx-mastery","vx-recskip","vx-saga"];
+const SLOT=(()=>{ try{ return localStorage.getItem("vx-slot")||""; }catch(e){ return ""; } })();
+const LKs=(k,s)=>s?k+"@"+s:k;
+const LK=k=>LKs(k,SLOT);
+function slotList(){ let L=[]; try{ L=JSON.parse(localStorage.getItem("vx-slots")||"[]"); }catch(e){} if(!L.some(x=>x.id==="")) L.unshift({id:"",n:"Primeira campanha",at:0}); return L; }
+function slotSave(L){ try{ localStorage.setItem("vx-slots",JSON.stringify(L)); }catch(e){} }
+function slotGo(id){ try{ localStorage.setItem("vx-slot",id); }catch(e){} location.reload(); }
+function slotStats(id){ let c={}, m={}; try{ c=JSON.parse(localStorage.getItem(LKs("vx-campaign",id))||"{}"); }catch(e){} try{ m=JSON.parse(localStorage.getItem(LKs("vx-mastery",id))||"{}"); }catch(e){}
+  return {bells:Object.keys(c.bells||{}).length, bosses:Object.keys(c.cleared||{}).length, heroes:Object.keys(m)}; }
+async function slotWipe(id){
+  const st=slotStats(id); let skip={}; try{ skip=JSON.parse(localStorage.getItem(LKs("vx-recskip",id))||"{}"); }catch(e){}
+  const heroes=[...new Set(st.heroes.concat(Object.keys(skip)))];
+  SLOT_KEYS.forEach(k=>{ try{ localStorage.removeItem(LKs(k,id)); }catch(e){} });
+  try{ const d=await idb(); await new Promise(ok=>{ const t=d.transaction("r","readwrite"), s=t.objectStore("r"); const q=s.openCursor();
+    q.onsuccess=()=>{ const c=q.result; if(!c){ return; } const k=String(c.key), parts=k.split("|"); const mine=id?k.indexOf(id+"|")===0:parts.length===2; if(mine) c.delete(); c.continue(); };
+    t.oncomplete=ok; t.onerror=ok; }); }catch(e){}
+  const cl=await cloud(); if(cl){ for(const hk of heroes) for(const kind of ["d1","now"]){ try{ await cl.db.doc(cl.base+recSafeS(hk,id)+"_"+kind).delete(); }catch(e){} } }
+}
+function openSlots(){
+  const o=document.createElement("div"); o.className="recov"; o.setAttribute("role","dialog"); o.setAttribute("aria-modal","true"); o.setAttribute("aria-label","Campanhas");
+  const card=document.createElement("div"); card.className="rec-card"; o.appendChild(card); document.body.appendChild(o);
+  let armed=null;
+  const paint=()=>{ const L=slotList();
+    card.innerHTML='<div class="rec-k">Campanhas salvas neste aparelho</div><h3 class="rec-n">Escolha a jornada</h3><p class="rec-lead">Cada campanha guarda o próprio progresso, as runas, a jornada e as vozes do primeiro dia.</p>'+
+      L.map(s=>{ const st=slotStats(s.id), cur=s.id===SLOT;
+        return '<div class="slot'+(cur?' cur':'')+'"><div class="slot-h"><b>'+esc(s.n)+'</b>'+(cur?'<span class="slot-tag">Em jogo</span>':'')+'</div><div class="slot-m">'+st.bells+' de 7 sinos · '+st.bosses+' chefões vencidos · '+st.heroes.length+' '+(st.heroes.length===1?'herói':'heróis')+'</div>'+
+          '<div class="rec-row small">'+(cur?'':'<button type="button" class="ghost" data-go="'+esc(s.id)+'">Jogar esta</button>')+
+          '<button type="button" class="ghost danger" data-wipe="'+esc(s.id)+'">'+(armed===s.id?(cur||s.id===""?'Toque de novo: apagar tudo':'Toque de novo: apagar'):(cur||s.id===""?'Recomeçar do zero':'Apagar'))+'</button></div></div>'; }).join("")+
+      '<div class="label" style="margin-top:14px">Nova campanha</div><div class="slot-new"><input id="slot-n" type="text" maxlength="40" placeholder="Ex.: Turma de terça" aria-label="Nome da nova campanha"><button type="button" class="primary" id="slot-add">Criar e começar</button></div>'+
+      '<div class="rec-row small"><button type="button" class="ghost" id="slot-x">Fechar</button></div>';
+    card.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>slotGo(b.dataset.go));
+    card.querySelectorAll("[data-wipe]").forEach(b=>b.onclick=async()=>{ const id=b.dataset.wipe;
+      if(armed!==id){ armed=id; paint(); return; }
+      b.disabled=true; b.textContent="Apagando…"; await slotWipe(id);
+      if(id!==""&&id!==SLOT) slotSave(slotList().filter(x=>x.id!==id));
+      if(id===SLOT) return location.reload(); armed=null; paint(); });
+    card.querySelector("#slot-add").onclick=()=>{ const n=(card.querySelector("#slot-n").value||"").trim()||("Campanha "+(slotList().length+1)); const id="s"+Date.now().toString(36); const L2=slotList(); L2.push({id,n,at:Date.now()}); slotSave(L2); slotGo(id); };
+    card.querySelector("#slot-x").onclick=()=>o.remove();
+  };
+  paint(); o.addEventListener("keydown",e=>{ if(e.key==="Escape") o.remove(); });
+  setTimeout(()=>{ const f=card.querySelector("#slot-n"); if(f) f.focus(); },50);
+}
+function paintSlotBar(){ const s=slotList().find(x=>x.id===SLOT)||{n:"Primeira campanha"}, st=slotStats(SLOT);
+  const n=document.getElementById("camp-name"), m=document.getElementById("camp-meta"); if(n) n.textContent=s.n; if(m) m.textContent=st.bells+" de 7 sinos · "+st.bosses+" chefões vencidos"; }
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const rnd=a=>a[Math.floor(Math.random()*a.length)];
@@ -912,8 +965,8 @@ function artWhisper(){ const u="w"+(++UID);
   '</svg>'; }
 
 /* ---------- mastery: per student, per item, saved on this device ---------- */
-let MST={}; try{ MST=JSON.parse(localStorage.getItem("vx-mastery")||"{}")||{}; }catch(e){ MST={}; }
-function saveM(){ try{ localStorage.setItem("vx-mastery",JSON.stringify(MST)); }catch(e){} }
+let MST={}; try{ MST=JSON.parse(localStorage.getItem(LK("vx-mastery"))||"{}")||{}; }catch(e){ MST={}; }
+function saveM(){ try{ localStorage.setItem(LK("vx-mastery"),JSON.stringify(MST)); }catch(e){} }
 const hkey=n=>String(n).trim().toLowerCase();
 function recOf(h,id){ const M=MST[h.key]||(MST[h.key]={}); return M[id]; }
 function ensureRec(h,id){ const M=MST[h.key]||(MST[h.key]={}); if(!M[id]) M[id]={s:h.start,s0:h.start,d0:Date.now(),ok:0,f:0,seen:0}; return M[id]; }
@@ -1317,9 +1370,11 @@ ATTACKS.twins6={n:"Plano ou Decisão?",fx:"hush",dmg:14,shout:"Plan or decision?
 /* ---------- voice of the first day: a 30 s self-introduction recorded once, compared at every Miyagi moment ---------- */
 const REC_MAX=30;
 let micFail=false; const recSkipSession={};
-function recSkips(){ try{ return JSON.parse(localStorage.getItem("vx-recskip")||"{}"); }catch(e){ return {}; } }
-function recSkipForever(hk){ const s=recSkips(); s[hk]=1; try{ localStorage.setItem("vx-recskip",JSON.stringify(s)); }catch(e){} }
-const recSafe=hk=>"rec_"+encodeURIComponent(hk).replace(/[^A-Za-z0-9_-]/g,"_").slice(0,120);
+function recSkips(){ try{ return JSON.parse(localStorage.getItem(LK("vx-recskip"))||"{}"); }catch(e){ return {}; } }
+function recSkipForever(hk){ const s=recSkips(); s[hk]=1; try{ localStorage.setItem(LK("vx-recskip"),JSON.stringify(s)); }catch(e){} }
+const recSafeS=(hk,sl)=>"rec_"+(sl?sl+"_":"")+encodeURIComponent(hk).replace(/[^A-Za-z0-9_-]/g,"_").slice(0,110);
+const recSafe=hk=>recSafeS(hk,SLOT);
+const RK=(hk,kind)=>(SLOT?SLOT+"|":"")+hk+"|"+kind;
 /* local store: IndexedDB, always used as the cache */
 function idb(){ return new Promise((ok,no)=>{ try{ const r=indexedDB.open("vx-rec",1); r.onupgradeneeded=()=>r.result.createObjectStore("r"); r.onsuccess=()=>ok(r.result); r.onerror=()=>no(r.error); }catch(e){ no(e); } }); }
 async function idbGet(k){ try{ const d=await idb(); return await new Promise(ok=>{ const q=d.transaction("r").objectStore("r").get(k); q.onsuccess=()=>ok(q.result||null); q.onerror=()=>ok(null); }); }catch(e){ return null; } }
@@ -1329,11 +1384,11 @@ let cloudP=null;
 function cloud(){ if(cloudP) return cloudP; cloudP=(async()=>{ try{ if(!window.claude||!window.claude.use) return null; const [db,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")]); if(!db||!user) return null; const id=await user.id(); return id?{db,base:"data/users/"+id+"/"}:null; }catch(e){ return null; } })(); return cloudP; }
 const b2u=b=>new Promise(ok=>{ const f=new FileReader(); f.onload=()=>ok(String(f.result).split(",")[1]||""); f.readAsDataURL(b); });
 const u2b=(s,t)=>{ const bin=atob(s), a=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) a[i]=bin.charCodeAt(i); return new Blob([a],{type:t}); };
-async function recSave(hk,kind,blob,dur){ const v={blob,mime:blob.type,at:Date.now(),dur}; await idbPut(hk+"|"+kind,v);
+async function recSave(hk,kind,blob,dur){ const v={blob,mime:blob.type,at:Date.now(),dur}; await idbPut(RK(hk,kind),v);
   const c=await cloud(); if(c){ try{ await c.db.doc(c.base+recSafe(hk)+"_"+kind).set({b64:await b2u(blob),mime:blob.type,at:v.at,dur}); v.synced=true; }catch(e){ v.synced=false; } } return v; }
-async function recLoad(hk,kind){ const l=await idbGet(hk+"|"+kind); if(l) return l;
+async function recLoad(hk,kind){ const l=await idbGet(RK(hk,kind)); if(l) return l;
   const c=await cloud(); if(!c) return null;
-  try{ const s=await c.db.doc(c.base+recSafe(hk)+"_"+kind).get(); const d=s.exists&&s.data(); if(!d||!d.b64) return null; const v={blob:u2b(d.b64,d.mime||"audio/webm"),mime:d.mime,at:d.at,dur:d.dur}; await idbPut(hk+"|"+kind,v); return v; }catch(e){ return null; } }
+  try{ const s=await c.db.doc(c.base+recSafe(hk)+"_"+kind).get(); const d=s.exists&&s.data(); if(!d||!d.b64) return null; const v={blob:u2b(d.b64,d.mime||"audio/webm"),mime:d.mime,at:d.at,dur:d.dur}; await idbPut(RK(hk,kind),v); return v; }catch(e){ return null; } }
 /* recorder */
 function recMime(){ const c=["audio/webm;codecs=opus","audio/webm","audio/mp4","audio/ogg;codecs=opus"]; if(!window.MediaRecorder) return null; return c.find(t=>{ try{ return MediaRecorder.isTypeSupported(t); }catch(e){ return false; } })||""; }
 async function startRec(onTick,onEnd){
@@ -1434,7 +1489,7 @@ const CHAPTERS={
           {id:"relojoeiro",col:"#9ff8ea",act:"Ato II",name:"O Relojoeiro Parado",hp:110,every:3,enrage:2,art:artClock,pattern:["tick","invert","fog","tick","chains","silence"],intro:"Your time is up.",lore:"Parou todos os relógios do mercado. Para ele, quem demora a responder fica preso no tempo."}]},
  c1:{short:"Capítulo 1",label:"Capítulo 1 · am / is / are",title:"O caminho até a Trava",ladder:true,data:CH1,unit:["frase","frases"],desc:"O verbo to be (am, is, are) em 28 frases do dia a dia: eu, ele e ela, nós e eles, negativas e perguntas. Cada herói joga no próprio degrau, e o progresso vale para a jornada.",bosses:BOSSES_C1}
 };
-let chapKey="c0"; try{ const c=localStorage.getItem("vx-chap"); if(c&&CHAPTERS[c]) chapKey=c; }catch(e){}
+let chapKey="c0"; try{ const c=localStorage.getItem(LK("vx-chap")); if(c&&CHAPTERS[c]) chapKey=c; }catch(e){}
 const CH=()=>CHAPTERS[chapKey];
 const LD=()=>CH().data;
 let BOSSES=CH().bosses;
@@ -1450,8 +1505,8 @@ const DEFAULT_CLS=["guerreiro","professor","engenheiro","metaleiro","executivo",
 let count=4, heroCls=DEFAULT_CLS.slice(), phase="rep", heroStart=[1,1,1,1,1,1,1,1];
 const PHASE_D={rep:"Repetir: a carta mostra a frase pronta e o áudio toca sozinho. Ajuda é grátis.",comp:"Completar: modelo com lacuna e tradução. Ajuda custa Foco.",cria:"Criar: só a instrução em português e as palavras-chave. Modelo escondido, ajuda custa Foco."};
 let progress={cleared:{},weak:{}};
-try{ const p=JSON.parse(localStorage.getItem("vx-campaign")||"null"); if(p&&p.cleared) progress=p; }catch(e){}
-function saveProgress(){ try{ localStorage.setItem("vx-campaign",JSON.stringify(progress)); }catch(e){} }
+try{ const p=JSON.parse(localStorage.getItem(LK("vx-campaign"))||"null"); if(p&&p.cleared) progress=p; }catch(e){}
+function saveProgress(){ try{ localStorage.setItem(LK("vx-campaign"),JSON.stringify(progress)); }catch(e){} }
 
 /* ---------- setup ---------- */
 function paintSetup(){
@@ -1469,8 +1524,9 @@ $("cnt-plus").onclick=()=>{ if(count<8){count++; sfx.pick(); paintSetup();} };
 function paintPhase(){ document.querySelectorAll("#phasesel button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.p===phase))); $("phase-desc").textContent=PHASE_D[phase]; }
 document.querySelectorAll("#phasesel button").forEach(b=>b.onclick=()=>{ phase=b.dataset.p; sfx.pick(); paintPhase(); });
 function paintChap(){ document.querySelectorAll("#chapsel button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.c===chapKey))); $("chap-desc").textContent=CH().desc; $("phase-box").hidden=CH().ladder; }
-document.querySelectorAll("#chapsel button").forEach(b=>b.onclick=()=>{ chapKey=b.dataset.c; BOSSES=CH().bosses; try{localStorage.setItem("vx-chap",chapKey);}catch(e){} sfx.pick(); paintChap(); paintSetup(); });
+document.querySelectorAll("#chapsel button").forEach(b=>b.onclick=()=>{ chapKey=b.dataset.c; BOSSES=CH().bosses; try{localStorage.setItem(LK("vx-chap"),chapKey);}catch(e){} sfx.pick(); paintChap(); paintSetup(); });
 paintSetup(); paintPhase(); paintChap();
+$("camp-open").onclick=()=>{ sfx.pick(); openSlots(); }; paintSlotBar();
 function show(id){ ["setup","map","battle","journey","grimoire"].forEach(s=>$(s).hidden=s!==id); window.scrollTo(0,0); }
 $("to-map").onclick=()=>{ ac(); if(!sagaSeen()) return openSaga(()=>{ paintMap(); show("map"); }); sfx.card(); paintMap(); show("map"); if(!chronShown && progress.chron && progress.chron.length){ chronShown=true; setTimeout(openChronicle,250); } };
 $("back-setup").onclick=()=>show("setup");
@@ -1572,7 +1628,7 @@ function paintSaga(){
   if(SG===SAGA&&sagaI===2) setTimeout(()=>sfx.lose(),250);
   if(SG!==SAGA) setTimeout(()=>sfx.bell(),250);
 }
-function closeSaga(onDone){ $("saga").hidden=true; if(SG===SAGA){ try{ localStorage.setItem("vx-saga","1"); }catch(e){} } if(onDone) onDone(); }
+function closeSaga(onDone){ $("saga").hidden=true; if(SG===SAGA){ try{ localStorage.setItem(LK("vx-saga"),"1"); }catch(e){} } if(onDone) onDone(); }
 const FINALE=[
  {t:"O Silêncio se desfaz",d:"Quando a última frase foi dita, a névoa rachou como vidro. Pela primeira vez em anos, o vento voltou a fazer barulho no alto da Torre do Eco.",
   art:u=>'<defs>'+rad(u+"bg","50%","40%","70%",[[0,"#fff3c2"],[.35,"#c98a5a",.7],[1,"#14121c"]])+'</defs><rect width="320" height="180" fill="url(#'+u+'bg)"/>'+[...Array(12)].map((_,i)=>{ const a=Math.PI*2*i/12; return '<path d="M160 72 L'+(160+220*Math.cos(a)).toFixed(0)+' '+(72+220*Math.sin(a)).toFixed(0)+'" stroke="#ffe2a0" stroke-width="3" opacity=".35"><animate attributeName="opacity" values=".15;.5;.15" dur="2.4s" begin="'+(i*.2)+'s" repeatCount="indefinite"/></path>'; }).join("")+
@@ -1596,7 +1652,7 @@ function openFinale(){ paintMap(); show("map"); openSaga(()=>{ if(!G||!G.B||!G.B
     kitHTML:'<div class="rank"><span class="label">Título da guilda</span><b>Vozeiros de Voxheim · Livro I completo</b></div>'+miyagiVoiceHTML()+miyagiHTML(),
     bindKit:box=>{ box.querySelectorAll("[data-en]").forEach(b=>b.onclick=()=>speak(b.dataset.en,true)); bindVoice(box); },
     buttons:[{label:"Ver a minha jornada",cls:"yes",fn:()=>openJourney()},{label:"Voltar ao reino",cls:"go",fn:()=>{ paintMap(); show("map"); }}]}); },FINALE); }
-function sagaSeen(){ try{ return localStorage.getItem("vx-saga")==="1"; }catch(e){ return false; } }
+function sagaSeen(){ try{ return localStorage.getItem(LK("vx-saga"))==="1"; }catch(e){ return false; } }
 
 /* ---------- the realm map: seven regions, seven bells ---------- */
 const REGIONS=[
@@ -1666,7 +1722,7 @@ function paintRegion(){
   box.innerHTML=h+'</div>';
   box.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{ const s=sp[+b.dataset.st]; startFromRegion(s); });
 }
-function startFromRegion(s){ chapKey=s.ck; BOSSES=CH().bosses; try{localStorage.setItem("vx-chap",chapKey);}catch(e){} firstDayGate(()=>{ if(progress.wins>=progress.megaAt) return startMega(s.ck); startBattle(s.bi); }); }
+function startFromRegion(s){ chapKey=s.ck; BOSSES=CH().bosses; try{localStorage.setItem(LK("vx-chap"),chapKey);}catch(e){} firstDayGate(()=>{ if(progress.wins>=progress.megaAt) return startMega(s.ck); startBattle(s.bi); }); }
 /* a bell rings when the last guardian of a region falls */
 function checkBell(){ const ri=REGIONS.findIndex(R=>R.ch===chapKey); if(ri<0||progress.bells[REGIONS[ri].id]||!regionDone(ri)) return null; progress.bells[REGIONS[ri].id]=true; saveProgress(); return REGIONS[ri]; }
 function ringBell(R,then){
@@ -2253,10 +2309,10 @@ function xpHTML(){ return '<ul class="xp-list">'+G.heroes.map(h=>'<li><span>'+es
 /* ---------- learning journey: practice and fixation per student ---------- */
 /* Fixation (0-100) grows with each success, more when the success comes in a new session (spaced practice),
    drops on a miss, fades slowly after two days without practice, and is capped by the step (step x 20). */
-let HIST={}; try{ HIST=JSON.parse(localStorage.getItem("vx-journey")||"{}")||{}; }catch(e){ HIST={}; }
+let HIST={}; try{ HIST=JSON.parse(localStorage.getItem(LK("vx-journey"))||"{}")||{}; }catch(e){ HIST={}; }
 Object.keys(HIST).forEach(k=>{ if(k.indexOf(":")<0){ HIST["c0:"+k]=HIST[k]; delete HIST[k]; } });
 const hk=k=>chapKey+":"+k;
-function saveH(){ try{ localStorage.setItem("vx-journey",JSON.stringify(HIST)); }catch(e){} }
+function saveH(){ try{ localStorage.setItem(LK("vx-journey"),JSON.stringify(HIST)); }catch(e){} }
 const DAY=864e5;
 function effFix(r){ if(!r) return 0; const f=r.fx||0, idle=r.lt?(Date.now()-r.lt)/DAY:0; return Math.max(0,Math.round(f-Math.max(0,idle-2)*1.5)); }
 function statusOf(r){ if(!r) return "nova"; const f=effFix(r); if(r.s>=5&&f>=80) return "fixada"; if(r.s>=4) return "aprendida"; return "praticando"; }
