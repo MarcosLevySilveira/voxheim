@@ -331,6 +331,13 @@ header{display:flex;align-items:center;gap:12px;border:1px solid var(--gold);pad
 .tut-b{display:flex;gap:8px;justify-content:space-between}.tut-b button{min-height:44px;padding:0 14px}.tut-b .ghost{font-size:12.5px;color:var(--ash)}
 .tut-next{background:var(--gold);color:var(--void);border:0;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:12.5px;flex:1;max-width:180px}
 @media (prefers-reduced-motion:reduce){.tut-ring,.tut-tap,.tut-wave{animation:none}.tut-hole{transition:none}}
+.rd{background:var(--void);border:1px solid var(--line);padding:10px 12px;margin:4px 0 10px;max-height:58vh;overflow:auto}
+.rd p{margin:0 0 8px;font-size:16px;line-height:1.5;color:var(--bone);border-left:3px solid var(--lc);padding-left:10px}.rd p:last-child{margin-bottom:0}
+.rd-n{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--lc);margin-bottom:2px}
+.rd-bar{height:4px;background:var(--line);margin:0 0 8px}.rd-bar i{display:block;height:100%;width:0;background:var(--blood);transition:width .25s linear}
+.rd-pick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 10px}.rd-pick button{min-height:46px;background:var(--slab);border:1px solid var(--line);color:var(--bone);font-weight:600}
+.rd-pick button[data-l]{border-left:4px solid var(--lc,var(--ash))}.rd-pick button[aria-pressed="true"]{background:var(--gold-soft);border-color:var(--gold);color:var(--gold)}.rd-pick button[data-l="0"]{grid-column:1/-1;font-weight:500;color:var(--ash)}
+.mv-grow{margin:6px 0 8px;padding:8px 10px;background:var(--gold-soft);border:1px solid rgba(201,164,92,.4)}.mv-grow b{display:block;color:var(--gold);font-size:15px}.mv-grow span{color:var(--ash);font-size:12px}
 .recov{position:fixed;inset:0;z-index:48;display:grid;place-items:center;background:radial-gradient(circle at 50% 30%,rgba(60,40,18,.97),rgba(0,0,0,.99) 72%);padding:16px;overflow:auto}
 .rec-card{width:100%;max-width:420px;background:var(--stone);border:1px solid var(--gold);padding:20px 18px;box-shadow:0 0 60px rgba(201,164,92,.18)}
 .rec-k{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
@@ -1382,7 +1389,15 @@ ATTACKS.canr={n:"Desafio do Can",fx:"oath",dmg:5,shout:"Can you? Can you?",type:
 ATTACKS.twins6={n:"Plano ou Decisão?",fx:"hush",dmg:14,shout:"Plan or decision?",type:"twins",labels:["PLANO · I'm going to","DECIDI AGORA · I'll"],who:"O Silêncio",q2:"Plano ou decisão na hora?",okW:" rompeu o Silêncio com o futuro certo!",desc:"O Silêncio mostra uma situação. O alvo escolhe entre plano (going to) e decisão na hora (will)."};
 
 /* ---------- voice of the first day: a 30 s self-introduction recorded once, compared at every Miyagi moment ---------- */
-const REC_MAX=30;
+const REC_MAX=60;
+/* the same text every time: four levels, from the first words to the end of Book I */
+const READ_TEXT=[
+ {n:"Nível 1",c:"#9fe3f2",t:"Hello! I am a student. This is my first day. I am a little nervous, but I am here."},
+ {n:"Nível 2",c:"#6fdba0",t:"Right now, I am reading this text out loud. My friends are listening. There is a long road on the map, and we have a lot of work."},
+ {n:"Nível 3",c:"#f2c46a",t:"Every week, I practice English with my group. Yesterday, I learned new words, and I spoke without fear. It wasn't easy, but it was fun."},
+ {n:"Nível 4",c:"#ff8a4d",t:"Next year, I'm going to travel and talk to people from other countries. I can't speak perfectly yet, but I will keep going, because my voice gets stronger every day."}];
+const readHTML=()=>'<div class="rd" lang="en">'+READ_TEXT.map(L=>'<p style="--lc:'+L.c+'"><span class="rd-n" lang="pt-BR">'+L.n+'</span>'+esc(L.t)+'</p>').join("")+'</div>';
+const lvlTxt=v=>!v?"":(v.lvl>=4?"leu tudo":v.lvl>0?"até o nível "+v.lvl:"não começou")+(v.dur?" · "+v.dur+" s":"");
 let micFail=false; const recSkipSession={};
 function recSkips(){ try{ return JSON.parse(localStorage.getItem(LK("vx-recskip"))||"{}"); }catch(e){ return {}; } }
 function recSkipForever(hk){ const s=recSkips(); s[hk]=1; try{ localStorage.setItem(LK("vx-recskip"),JSON.stringify(s)); }catch(e){} }
@@ -1398,11 +1413,11 @@ let cloudP=null;
 function cloud(){ if(cloudP) return cloudP; cloudP=(async()=>{ try{ if(!window.claude||!window.claude.use) return null; const [db,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")]); if(!db||!user) return null; const id=await user.id(); return id?{db,base:"data/users/"+id+"/"}:null; }catch(e){ return null; } })(); return cloudP; }
 const b2u=b=>new Promise(ok=>{ const f=new FileReader(); f.onload=()=>ok(String(f.result).split(",")[1]||""); f.readAsDataURL(b); });
 const u2b=(s,t)=>{ const bin=atob(s), a=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) a[i]=bin.charCodeAt(i); return new Blob([a],{type:t}); };
-async function recSave(hk,kind,blob,dur){ const v={blob,mime:blob.type,at:Date.now(),dur}; await idbPut(RK(hk,kind),v);
-  const c=await cloud(); if(c){ try{ await c.db.doc(c.base+recSafe(hk)+"_"+kind).set({b64:await b2u(blob),mime:blob.type,at:v.at,dur}); v.synced=true; }catch(e){ v.synced=false; } } return v; }
+async function recSave(hk,kind,blob,dur,lvl){ const v={blob,mime:blob.type,at:Date.now(),dur,lvl}; await idbPut(RK(hk,kind),v);
+  const c=await cloud(); if(c){ try{ await c.db.doc(c.base+recSafe(hk)+"_"+kind).set({b64:await b2u(blob),mime:blob.type,at:v.at,dur,lvl}); v.synced=true; }catch(e){ v.synced=false; } } return v; }
 async function recLoad(hk,kind){ const l=await idbGet(RK(hk,kind)); if(l) return l;
   const c=await cloud(); if(!c) return null;
-  try{ const s=await c.db.doc(c.base+recSafe(hk)+"_"+kind).get(); const d=s.exists&&s.data(); if(!d||!d.b64) return null; const v={blob:u2b(d.b64,d.mime||"audio/webm"),mime:d.mime,at:d.at,dur:d.dur}; await idbPut(RK(hk,kind),v); return v; }catch(e){ return null; } }
+  try{ const s=await c.db.doc(c.base+recSafe(hk)+"_"+kind).get(); const d=s.exists&&s.data(); if(!d||!d.b64) return null; const v={blob:u2b(d.b64,d.mime||"audio/webm"),mime:d.mime,at:d.at,dur:d.dur,lvl:d.lvl}; await idbPut(RK(hk,kind),v); return v; }catch(e){ return null; } }
 /* recorder */
 function recMime(){ const c=["audio/webm;codecs=opus","audio/webm","audio/mp4","audio/ogg;codecs=opus"]; if(!window.MediaRecorder) return null; return c.find(t=>{ try{ return MediaRecorder.isTypeSupported(t); }catch(e){ return false; } })||""; }
 async function startRec(onTick,onEnd){
@@ -1419,63 +1434,74 @@ function playBlob(b,onEnd){ stopSay(); if(recAudio){ recAudio.pause(); } const u
 function stopPlay(){ if(recAudio){ recAudio.pause(); recAudio=null; } }
 const MIC_SVG='<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
 const recDate=t=>{ try{ return new Date(t).toLocaleDateString("pt-BR",{day:"2-digit",month:"short",year:"numeric"}); }catch(e){ return ""; } };
-/* one recording panel, used for the first day and for "today" */
+/* one reading panel, used for the first day and for "today": read the same text out loud in 60 s */
 function recPanel(box,{hk,name,kind,title,lead,saveLabel,onSaved,onSkip,onNever}){
-  let blob=null, dur=0, stop=null;
+  let blob=null, dur=0, stop=null, lvl=null;
   const paint=st=>{
-    box.innerHTML='<div class="rec-k">'+esc(title)+'</div><h3 class="rec-n">'+esc(name)+'</h3><p class="rec-lead">'+lead+'</p>'+
-      (st==="idle"?'<button type="button" class="rec-btn" data-a="go">'+MIC_SVG+'<span>Gravar (até '+REC_MAX+' s)</span></button>':"")+
-      (st==="rec"?'<div class="rec-live" aria-live="polite"><i></i><b id="rec-s">0 s</b> de '+REC_MAX+' s</div><button type="button" class="rec-btn stop" data-a="stop"><span>Parar</span></button>':"")+
-      (st==="done"?'<div class="rec-row"><button type="button" class="ghost" data-a="play">Ouvir ('+dur+' s)</button><button type="button" class="ghost" data-a="go">Regravar</button></div><button type="button" class="primary" data-a="save">'+esc(saveLabel)+'</button>':"")+
+    box.innerHTML='<div class="rec-k">'+esc(title)+'</div><h3 class="rec-n">'+esc(name)+'</h3>'+(st==="idle"||st==="fail"?'<p class="rec-lead">'+lead+'</p>':"")+
+      (st==="idle"||st==="rec"?readHTML():"")+
+      (st==="idle"?'<button type="button" class="rec-btn" data-a="go">'+MIC_SVG+'<span>Começar a ler ('+REC_MAX+' s)</span></button>':"")+
+      (st==="rec"?'<div class="rec-live" aria-live="polite"><i></i><b id="rec-s">'+REC_MAX+' s</b> restantes</div><div class="rd-bar"><i id="rec-bar"></i></div><button type="button" class="rec-btn stop" data-a="stop"><span>Terminei</span></button>':"")+
+      (st==="lvl"?'<p class="rec-lead"><b>Até onde você chegou?</b> Toque no último nível que conseguiu ler até o fim.</p><div class="rd-pick">'+READ_TEXT.map((L,i)=>'<button type="button" data-l="'+(i+1)+'" style="--lc:'+L.c+'"'+(lvl===i+1?' aria-pressed="true"':'')+'>'+(i===3?"Li tudo":L.n)+'</button>').join("")+'<button type="button" data-l="0"'+(lvl===0?' aria-pressed="true"':'')+'>Não terminei o nível 1</button></div>':"")+
+      (st==="lvl"&&lvl!=null?'<div class="rec-row"><button type="button" class="ghost" data-a="play">Ouvir ('+dur+' s)</button><button type="button" class="ghost" data-a="go">Ler de novo</button></div><button type="button" class="primary" data-a="save">'+esc(saveLabel)+'</button>':"")+
       (st==="saving"?'<p class="rec-lead">Guardando…</p>':"")+
       (st==="fail"?'<p class="rec-lead rec-warn">O microfone não está disponível nesta tela. Dá para jogar normalmente; a comparação de voz fica desligada por enquanto.</p>':"")+
       '<div class="rec-row small">'+(onSkip&&st!=="rec"&&st!=="saving"?'<button type="button" class="ghost" data-a="skip">'+(st==="fail"?"Continuar":"Agora não")+'</button>':"")+(onNever&&st==="idle"?'<button type="button" class="ghost" data-a="never">Não gravar</button>':"")+'</div>';
     box.querySelectorAll("[data-a]").forEach(b=>b.onclick=act);
+    box.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{ lvl=+b.dataset.l; sfx.pick(); paint("lvl"); });
   };
   async function act(e){ const a=e.currentTarget.dataset.a;
-    if(a==="go"){ stopPlay(); try{ stop=await startRec(s=>{ const el=box.querySelector("#rec-s"); if(el) el.textContent=s+" s"; },(b,d)=>{ blob=b; dur=d; stop=null; paint("done"); }); sfx.pick(); paint("rec"); }catch(err){ micFail=true; paint("fail"); } }
+    if(a==="go"){ stopPlay(); lvl=null; try{ stop=await startRec(s=>{ const el=box.querySelector("#rec-s"), br=box.querySelector("#rec-bar"); if(el) el.textContent=Math.max(0,REC_MAX-s)+" s"; if(br) br.style.width=Math.min(100,s/REC_MAX*100)+"%"; },(b,d)=>{ blob=b; dur=d; stop=null; paint("lvl"); }); sfx.pick(); paint("rec"); }catch(err){ micFail=true; paint("fail"); } }
     else if(a==="stop"){ if(stop) stop(); }
     else if(a==="play"){ if(blob) playBlob(blob); }
-    else if(a==="save"){ stopPlay(); paint("saving"); const v=await recSave(hk,kind,blob,dur); onSaved&&onSaved(v); }
-    else if(a==="skip"){ stopPlay(); onSkip&&onSkip(); }
+    else if(a==="save"){ stopPlay(); paint("saving"); const v=await recSave(hk,kind,blob,dur,lvl); onSaved&&onSaved(v); }
+    else if(a==="skip"){ stopPlay(); if(stop) stop(); onSkip&&onSkip(); }
     else if(a==="never"){ recSkipForever(hk); onSkip&&onSkip(); }
   }
   paint(micFail?"fail":"idle");
 }
 /* gate: before a battle, heroes without a first-day voice record it once */
-const FIRST_LEAD='Apresente-se em inglês do jeito que conseguir: seu nome, de onde você é, o que faz, do que gosta. <b>Pode travar. Pode misturar com português.</b> Essa gravação fica guardada e só volta num momento especial.';
+const FIRST_LEAD='Leia o texto em voz alta, no seu ritmo, por até 60 segundos. <b>Não precisa terminar.</b> Palavra difícil? Tente e siga em frente. Essa gravação fica guardada e só volta num momento especial.';
 async function firstDayGate(then){
   if(micFail||!navigator.mediaDevices||!window.MediaRecorder) return then();
   const sk=recSkips(), names=[...Array(count).keys()].map(i=>(NAMES[i]||"").trim()||("Herói "+(i+1)));
   const todo=[]; for(const n of names){ const hk=hkey(n); if(sk[hk]||recSkipSession[hk]) continue; if(!(await recLoad(hk,"d1"))) todo.push(n); }
   if(!todo.length) return then();
+  tutYield();
   const o=document.createElement("div"); o.className="recov"; o.setAttribute("role","dialog"); o.setAttribute("aria-modal","true"); o.setAttribute("aria-label","Gravação do primeiro dia");
   const card=document.createElement("div"); card.className="rec-card"; o.appendChild(card); document.body.appendChild(o);
-  let i=0; const next=()=>{ if(micFail||i>=todo.length){ o.remove(); return then(); } const n=todo[i++], hk=hkey(n);
+  let i=0; const next=()=>{ if(micFail||i>=todo.length){ o.remove(); return then(); } const n=todo[i++], hk=hkey(n); o.scrollTop=0;
     recPanel(card,{hk,name:n,kind:"d1",title:"A voz do primeiro dia · "+i+" de "+todo.length,lead:FIRST_LEAD,saveLabel:"Guardar e seguir",
       onSaved:()=>{ sfx.bell(); next(); },onSkip:()=>{ recSkipSession[hk]=1; next(); },onNever:true}); };
   next();
 }
-/* Miyagi: today's voice next to the first day's */
-function miyagiVoiceHTML(){ return '<div class="mvoice"><div class="label" style="margin-top:6px">A voz de antes e a de agora</div><p class="k-tr">Cada um grava a mesma apresentação de novo. Depois, ouçam as duas, uma em seguida da outra.</p><div class="mv-list"></div></div>'; }
+/* Miyagi: today's reading next to the first day's */
+function miyagiVoiceHTML(){ return '<div class="mvoice"><div class="label" style="margin-top:6px">A voz de antes e a de agora</div><p class="k-tr">Cada um lê de novo o mesmo texto do primeiro dia, em 60 segundos. Depois, ouçam as duas leituras, uma em seguida da outra.</p><div class="mv-list"></div></div>'; }
 async function bindVoice(root){
   const host=root.querySelector(".mvoice .mv-list"); if(!host||!G) return;
   if(!navigator.mediaDevices||!window.MediaRecorder){ host.innerHTML='<p class="k-tr">Este aparelho não grava áudio.</p>'; return; }
   for(const h of G.heroes){ const row=document.createElement("div"); row.className="mv-row"; host.appendChild(row); paintVoiceRow(row,h); }
 }
+function growHTML(d1,now){ if(!d1||!now) return "";
+  const dl=(now.lvl||0)-(d1.lvl||0), dt=(d1.dur||0)-(now.dur||0); const bits=[];
+  if(dl>0) bits.push(dl===1?"1 nível a mais":dl+" níveis a mais");
+  if((now.lvl||0)>=4&&(d1.lvl||0)>=4&&dt>0) bits.push(dt+" s mais rápido");
+  if((now.lvl||0)>=4&&(d1.lvl||0)<4) bits.push("leu o texto inteiro");
+  return '<div class="mv-grow">'+(bits.length?'<b>'+esc(bits.join(" · "))+'</b>':'<b>Mesmo ponto do primeiro dia</b>')+'<span>Primeiro dia: '+esc(lvlTxt(d1))+' · Hoje: '+esc(lvlTxt(now))+'</span></div>'; }
 async function paintVoiceRow(row,h){
   const d1=await recLoad(h.key,"d1"), now=await recLoad(h.key,"now"), fresh=now&&G&&now.at>=(G.sess||0);
-  row.innerHTML='<div class="mv-h"><b>'+esc(h.name)+'</b>'+(d1?'<span>Primeiro dia: '+esc(recDate(d1.at))+'</span>':'<span>Sem gravação do primeiro dia</span>')+'</div>'+
+  row.innerHTML='<div class="mv-h"><b>'+esc(h.name)+'</b>'+(d1?'<span>Primeiro dia: '+esc(recDate(d1.at))+(d1.lvl!=null?' · '+esc(lvlTxt(d1)):'')+'</span>':'<span>Sem gravação do primeiro dia</span>')+'</div>'+
+    (d1&&fresh?growHTML(d1,now):"")+
     '<div class="rec-row">'+(d1?'<button type="button" class="ghost" data-a="d1">Ouvir o primeiro dia</button>':"")+
     (fresh?'<button type="button" class="ghost" data-a="now">Ouvir hoje</button>':"")+'</div>'+
     (d1&&fresh?'<button type="button" class="primary" data-a="both">Antes e depois</button>':"")+
-    '<button type="button" class="rec-btn" data-a="rec">'+MIC_SVG+'<span>'+(d1?(fresh?"Gravar de novo":"Gravar a voz de hoje"):"Gravar a primeira voz")+'</span></button><div class="mv-pan" hidden></div>';
+    '<button type="button" class="rec-btn" data-a="rec">'+MIC_SVG+'<span>'+(d1?(fresh?"Ler de novo":"Ler o texto de novo"):"Gravar a primeira leitura")+'</span></button><div class="mv-pan" hidden></div>';
   const q=s=>row.querySelector(s);
   row.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{ const a=b.dataset.a;
     if(a==="d1") playBlob(d1.blob); else if(a==="now") playBlob(now.blob);
     else if(a==="both"){ row.classList.add("p1"); playBlob(d1.blob,()=>{ row.classList.remove("p1"); row.classList.add("p2"); setTimeout(()=>playBlob(now.blob,()=>row.classList.remove("p2")),700); }); }
     else if(a==="rec"){ const p=q(".mv-pan"); p.hidden=false; b.hidden=true;
-      recPanel(p,{hk:h.key,name:h.name,kind:d1?"now":"d1",title:d1?"A voz de hoje":"A primeira voz",lead:d1?'A mesma coisa do primeiro dia: apresente-se em inglês, em até '+REC_MAX+' segundos. <b>Sem ajuda.</b>':FIRST_LEAD,saveLabel:d1?"Guardar e comparar":"Guardar",
+      recPanel(p,{hk:h.key,name:h.name,kind:d1?"now":"d1",title:d1?"A leitura de hoje":"A primeira leitura",lead:d1?'O mesmo texto do primeiro dia, em até '+REC_MAX+' segundos. <b>Sem ajuda.</b> Vejam até onde vocês chegam agora.':FIRST_LEAD,saveLabel:d1?"Guardar e comparar":"Guardar",
         onSaved:()=>{ sfx.bell(); paintVoiceRow(row,h); },onSkip:()=>paintVoiceRow(row,h)}); }
   });
 }
@@ -1515,10 +1541,11 @@ const TOURS={
 };
 function tutSeen(){ try{ return JSON.parse(localStorage.getItem(LK("vx-tut"))||"{}"); }catch(e){ return {}; } }
 function tutMark(k){ const s=tutSeen(); s[k]=1; try{ localStorage.setItem(LK("vx-tut"),JSON.stringify(s)); }catch(e){} }
+function tutYield(){ if(!tutCur||!tutClose) return; const n=tutCur, s=tutSeen(); delete s[n]; try{ localStorage.setItem(LK("vx-tut"),JSON.stringify(s)); }catch(e){} tutClose(); }
 function tutReset(){ try{ localStorage.removeItem(LK("vx-tut")); }catch(e){} }
 const tutVisible=el=>{ if(!el) return false; const r=el.getBoundingClientRect(); return r.width>0&&r.height>0&&getComputedStyle(el).visibility!=="hidden"; };
 const tutBlocked=()=>!!document.querySelector(".cine,.recov,.bellfx,.tut")||!$("saga").hidden;
-let tutBusy=false;
+let tutBusy=false, tutCur=null, tutClose=null;
 function tour(name,ctx){
   const S=tutSeen(); if(S.off||S[name]) return;
   let tries=0; const go=()=>{ if(tutSeen()[name]) return; if(tutBusy){ if(++tries<80) setTimeout(go,400); return; }
@@ -1530,7 +1557,7 @@ function tour(name,ctx){
 function runTour(name){
   const steps=TOURS[name].map(s=>({...s,node:typeof s.el==="function"?s.el():document.querySelector(s.el)})).filter(s=>tutVisible(s.node));
   if(!steps.length){ tutMark(name); return; }
-  tutBusy=true; tutMark(name);
+  tutBusy=true; tutCur=name; tutMark(name);
   const o=document.createElement("div"); o.className="tut"; o.setAttribute("role","dialog"); o.setAttribute("aria-modal","true"); o.setAttribute("aria-label","Tutorial");
   o.innerHTML='<div class="tut-hole"><i class="tut-ring"></i></div><div class="tut-tap" aria-hidden="true"><svg viewBox="0 0 48 48" width="44" height="44"><circle cx="20" cy="18" r="9" fill="none" stroke="#f2c46a" stroke-width="2.5" class="tut-wave"/><path d="M18 18v16l-4-4c-2-2-5 1-3 3l8 9h12c3 0 5-3 5-6V24c0-2-3-2-3 0v2-4c0-2-3-2-3 0v2-4c0-2-3-2-3 0v2-6c0-2-4-2-4 0z" fill="#EEE6D3" stroke="#0D0C11" stroke-width="1.5"/></svg></div><div class="tut-tip"><div class="tut-k"></div><h3 class="tut-t"></h3><p class="tut-d"></p><div class="tut-b"><button type="button" class="ghost" data-t="skip">Pular tutoriais</button><button type="button" class="tut-next" data-t="next"></button></div></div>';
   document.body.appendChild(o);
@@ -1545,7 +1572,7 @@ function runTour(name){
     o.querySelector(".tut-k").textContent="Tutorial · "+(i+1)+" de "+steps.length; o.querySelector(".tut-t").textContent=s.t; o.querySelector(".tut-d").textContent=s.d;
     o.querySelector(".tut-next").textContent=i===steps.length-1?"Entendi":"Próximo";
     requestAnimationFrame(()=>requestAnimationFrame(place)); setTimeout(place,120); o.querySelector(".tut-next").focus(); };
-  const close=()=>{ o.remove(); tutBusy=false; removeEventListener("resize",place); };
+  const close=()=>{ o.remove(); tutBusy=false; tutCur=null; tutClose=null; removeEventListener("resize",place); }; tutClose=close;
   o.querySelector('[data-t="next"]').onclick=()=>{ try{ sfx.pick(); }catch(e){} if(++i>=steps.length) close(); else show(); };
   o.querySelector('[data-t="skip"]').onclick=()=>{ const s=tutSeen(); s.off=1; try{ localStorage.setItem(LK("vx-tut"),JSON.stringify(s)); }catch(e){} close(); };
   o.addEventListener("keydown",e=>{ if(e.key==="Escape") close(); });
