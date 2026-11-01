@@ -633,7 +633,7 @@ details ul{margin:8px 0 0;padding-left:18px;font-size:13.5px;display:flex;flex-d
 (function(){
 "use strict";
 /* ---------- campaigns: separate save slots, each with its own progress, journey, runes and voices ---------- */
-const SLOT_KEYS=["vx-campaign","vx-chap","vx-journey","vx-mastery","vx-recskip","vx-saga"];
+const SLOT_KEYS=["vx-campaign","vx-chap","vx-journey","vx-mastery","vx-recskip","vx-saga","vx-tut"];
 const SLOT=(()=>{ try{ return localStorage.getItem("vx-slot")||""; }catch(e){ return ""; } })();
 const LKs=(k,s)=>s?k+"@"+s:k;
 const LK=k=>LKs(k,SLOT);
