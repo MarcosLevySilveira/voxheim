@@ -354,6 +354,17 @@ header{display:flex;align-items:center;gap:12px;border:1px solid var(--gold);pad
 .mode-seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mode-seg button{min-height:52px;border:1px solid var(--line);background:var(--slab);font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
 .mode-seg button small{font-weight:400;font-size:11.5px;color:var(--ash)}.mode-seg button[aria-pressed="true"]{border-color:var(--gold);background:var(--gold-soft);color:var(--gold)}
 @media (prefers-reduced-motion:reduce){.btns .sr-btn.on{animation:none}}
+.ex-stat{display:flex;gap:8px;flex-wrap:wrap}.ex-stat span{flex:1 1 90px;border:1px solid var(--line);background:var(--slab);padding:8px;text-align:center;font-size:12.5px;color:var(--ash)}.ex-stat b{color:var(--bone);font-size:16px}
+.ex-relics{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.ex-relics span{font-size:12px;padding:4px 8px;border:1px solid var(--rc);color:var(--rc);background:rgba(0,0,0,.25)}
+.ex-path{display:flex;flex-direction:column;gap:10px;margin-top:12px;position:relative}
+.ex-boss{display:grid;grid-template-columns:84px 1fr;gap:12px;align-items:center;border:1px solid var(--line);background:var(--slab);padding:10px}.ex-boss.ready{border-color:var(--blood);box-shadow:0 0 24px rgba(200,70,79,.25)}.ex-boss b{font-size:20px;font-weight:400}.ex-boss .primary{width:100%;margin-top:8px}
+.ex-row{border-left:2px dashed var(--line);padding-left:12px;margin-left:8px}.ex-row.now{border-left-color:var(--gold)}.ex-step{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ash)}.ex-row.now .ex-step{color:var(--gold)}
+.ex-nodes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.ex-node{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;padding:12px 8px;min-height:120px;border:1px solid var(--line);background:var(--slab);color:var(--bone)}
+.ex-node small{font-size:11.5px;color:var(--ash);line-height:1.35}.ex-row.now .ex-node{border-color:var(--gold);color:var(--gold)}.ex-row.now .ex-node small{color:var(--bone)}
+.ex-node.chosen{border-color:var(--arcane);color:var(--arcane);opacity:1}.ex-node.off{opacity:.35}.ex-node:disabled{cursor:default}
+.ex-shop{display:grid;gap:8px}.ex-shop button{text-align:left;padding:12px;border:1px solid var(--rc);background:var(--slab);display:flex;flex-direction:column;gap:4px}.ex-shop b{color:var(--rc);font-family:var(--display);font-weight:400;font-size:18px}.ex-shop small{color:var(--bone);font-size:12.5px}
+.k-ans{font-family:var(--display);font-size:18px;color:var(--gold);margin:6px 0}
 .recov{position:fixed;inset:0;z-index:48;display:grid;place-items:center;background:radial-gradient(circle at 50% 30%,rgba(60,40,18,.97),rgba(0,0,0,.99) 72%);padding:16px;overflow:auto}
 .rec-card{width:100%;max-width:420px;background:var(--stone);border:1px solid var(--gold);padding:20px 18px;box-shadow:0 0 60px rgba(201,164,92,.18)}
 .rec-k{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
@@ -562,6 +573,14 @@ details ul{margin:8px 0 0;padding-left:18px;font-size:13.5px;display:flex;flex-d
     </div>
     <div class="panel space-detail" id="atlas-detail" aria-live="polite"></div>
     <button type="button" class="ghost" id="atlas-back">Voltar e mudar o grupo</button>
+  </section>
+  <section id="expedition" hidden aria-labelledby="ex-title" style="display:flex;flex-direction:column;gap:12px">
+    <div class="panel">
+      <div class="label">Expedição solo</div>
+      <h2 id="ex-title" class="display" style="margin:2px 0 8px;font-size:24px">Expedição</h2>
+      <div id="ex-body"></div>
+    </div>
+    <button type="button" class="ghost" id="ex-quit">Desistir da expedição</button>
   </section>
   <section id="map" hidden aria-labelledby="map-h" style="display:flex;flex-direction:column;gap:12px">
     <div class="panel board-panel">
@@ -1559,6 +1578,10 @@ const TOURS={
   {el:"#atlas-art",t:"O Atlas de Voxheim",d:"Este é o mundo inteiro: 5 continentes, do A1 ao C2, e 6 ilhas para explorar. Os que estão sob a névoa abrem conforme a guilda avança."},
   {el:"#atlas-art .at-here",t:"Vocês estão aqui",d:"A jornada começa no Reino de Voxheim. Toquem em qualquer terra do mapa para ver o que se aprende lá."},
   {el:"#atlas-enter",t:"Hora de entrar",d:"Toquem aqui para abrir o mapa do Reino e começar.",tap:true}],
+ expedition:[
+  {el:".ex-boss",t:"A expedição",d:"Sozinho, cada chefão fica no fim de um caminho. Até lá, são 3 trechos, e em cada um você escolhe por onde ir."},
+  {el:".ex-row.now",t:"Escolha o caminho",d:"Taverna dá Foco, Fogueira cura, Encontro arrisca Coragem por uma runa, e o Mercador vende runas para quem pede em inglês.",tap:true},
+  {el:".ex-stat",t:"Leve tudo para a batalha",d:"A Coragem, o Foco e as runas que você juntar entram com você na luta contra o chefão. Cada expedição é diferente."}],
  map:[
   {el:"#board-art",t:"O mapa do Reino",d:"Dentro do Reino, são 7 regiões. Cada uma tem chefões e um sino. Vencendo todos os chefões, o sino toca e a próxima região se abre."},
   {el:()=>document.querySelector("#board-art .rg.sel")||document.querySelector("#board-art .rg"),t:"Comecem por aqui",d:"Toque numa região para ver os chefões dela. A primeira já está aberta.",tap:true},
@@ -1825,8 +1848,8 @@ function listenOnce(onDone){ let r; try{ r=new SR(); }catch(e){ onDone({err:"uns
 /* adds "Fale e o jogo confere" to any speaking card in solo mode */
 function attachSpeech(o){
   if(!SOLO||!SR||!G||G.over) return; const bx=$("sh-btns"), yes=bx.querySelector(".yes"), no=bx.querySelector(".no"); if(!yes||!no) return;
-  let exp=o.expect||""; if(!exp){ const m=$("sh-kit").querySelector('.k-model[lang="en"]'); if(m) exp=m.textContent; } if(!exp&&o.lang==="en"&&o.task&&!/\?\s*$/.test(o.task)&&!/→/.test(o.task)) exp=o.task;
-  const open=!exp; let tries=0, stopL=null;
+  let exp=o.open?"":(o.expect||""); if(!exp&&!o.open){ const m=$("sh-kit").querySelector('.k-model[lang="en"]'); if(m) exp=m.textContent; } if(!exp&&o.lang==="en"&&o.task&&!/\?\s*$/.test(o.task)&&!/→/.test(o.task)) exp=o.task;
+  const open=o.open||!exp; let tries=0, stopL=null;
   const row=document.createElement("div"); row.className="sr-row full";
   row.innerHTML='<button type="button" class="sr-btn"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>'+(open?"Responder falando":"Falar: o jogo confere")+'</span></button><p class="sr-out" aria-live="polite" hidden></p>';
   bx.insertBefore(row,bx.firstChild); yes.hidden=true;
@@ -1858,16 +1881,94 @@ function companionTurn(then){
     hint:c.name+": “"+rnd(c.say)+"” Ouça o ataque. "+(c.id==="bram"?"Ele":"Ela")+" falou certo?",
     kitHTML:'<button type="button" class="bigplay" id="cp-play">'+playSvg()+'<span>Ouvir de novo</span></button><p class="k-tr">'+esc(c.name)+' quis dizer: '+esc(it.pt)+'</p>',
     bindKit:box=>{ box.querySelector("#cp-play").onclick=()=>speak(line,true); },
-    buttons:[{label:"Está certo",cls:"go",fn:()=>{ if(!wrong){ hitBoss(7,false,false); setLog(c.name+" acertou o golpe. Boa leitura!"); sfx.pick(); fin(); }
+    buttons:[{label:"Está certo",cls:"go",fn:()=>{ if(!wrong){ hitBoss(7*(G.compMul||1),false,false); setLog(c.name+" acertou o golpe. Boa leitura!"); sfx.pick(); fin(); }
         else { closeSheet(); openSheet({chip:"Tinha um erro",color:"#C8464F",who:c.name,task:it.en,lang:"en",autoSay:it.en,hint:c.name+" disse “"+it.wrong+"”. O certo é a frase acima. O golpe falhou.",buttons:[{label:"Entendi",cls:"go",full:true,fn:()=>{ hurtTeam(4); setLog("O golpe errado de "+c.name+" deu brecha ao chefão: −4 de Coragem."); fin(); }}]}); } }},
       {label:"Tem um erro",cls:"no",fn:()=>{ closeSheet();
         if(!wrong){ openSheet({chip:"Estava certo!",color:C.c,who:c.name,task:it.en,lang:"en",hint:"Essa frase estava certa. "+c.name+" duvidou de si e o golpe saiu fraco.",buttons:[{label:"Continuar",cls:"go",full:true,fn:()=>{ hitBoss(3,false,false); fin(); }}]}); return; }
         openSheet({chip:"Corrija "+c.name,color:"#5CC4B4",who:"Você ensina",task:"“"+it.wrong+"”",lang:"en",expect:it.en,secs:15,hint:"Diga a frase certa, em voz alta. Ensinar vale golpe crítico.",
           kitHTML:'<p class="k-tr">Significa: '+esc(it.pt)+'</p><button type="button" class="ghost" id="cp-rev">Ver a frase certa</button><p class="k-model" id="cp-ans" hidden lang="en">'+esc(it.en)+'</p>',
           bindKit:box=>{ box.querySelector("#cp-rev").onclick=e=>{ box.querySelector("#cp-ans").hidden=false; e.target.hidden=true; speak(it.en,false); }; },
-          buttons:[{label:"Corrigi",sub:"golpe crítico em dupla",cls:"yes",fn:()=>{ H.speaks++; recordResult(H,it,4,true,false); hitBoss(14,true,false); setLog(H.name+" corrigiu "+c.name+", e os dois atacaram juntos!"); fin(); }},
+          buttons:[{label:"Corrigi",sub:"golpe crítico em dupla",cls:"yes",fn:()=>{ H.speaks++; recordResult(H,it,4,true,false); hitBoss(14*(G.compMul||1),true,false); setLog(H.name+" corrigiu "+c.name+", e os dois atacaram juntos!"); fin(); }},
                    {label:"Não sei",sub:"a frase vai voltar",cls:"no",fn:()=>{ recordResult(H,it,4,false,false); speak(it.en,false); setLog("A frase certa era: "+it.en); fin(); }}]}); }}]});
 }
+
+/* ---------- solo expedition: a short path with forks before each boss; every run is different ---------- */
+const RELICS={
+ eco:{n:"Runa do Eco",en:"the echo rune",d:"Todos os seus golpes causam 20% a mais de dano.",c:"#9fe3f2"},
+ escudo:{n:"Runa do Escudo",en:"the shield rune",d:"Bloqueia o primeiro ataque do chefão.",c:"#c4bccf"},
+ tempo:{n:"Runa do Tempo",en:"the time rune",d:"O chefão demora 2 ações a mais para o primeiro ataque.",c:"#f2c46a"},
+ amizade:{n:"Runa da Amizade",en:"the friendship rune",d:"Os golpes de Nina e Bram valem o dobro.",c:"#E68FA7"},
+ foco:{n:"Runa do Foco",en:"the focus rune",d:"Comece a batalha com 3 de Foco a mais.",c:"#6fdba0"},
+ sangue:{n:"Runa de Sangue",en:"the blood rune",d:"Risco: o chefão tem 25% a mais de vida, mas você causa 40% a mais de dano.",c:"#C8464F"}};
+const NODES={
+ taverna:{n:"Taverna",d:"Converse com um viajante. Ganha Foco e Coragem.",ic:'<path d="M7 9h12v14a3 3 0 0 1-3 3H10a3 3 0 0 1-3-3z"/><path d="M19 12h3a3 3 0 0 1 0 6h-3"/><path d="M9 5c0 1 1 1 1 2M13 4c0 1 1 1 1 2"/>'},
+ treino:{n:"Fogueira",d:"Treine duas frases e descanse. Recupera Coragem.",ic:'<path d="M16 4c4 5 6 8 6 12a6 6 0 0 1-12 0c0-2 1-4 2-5 0 2 1 3 2 3 0-4 1-7 2-10z"/><path d="M8 27h16"/>'},
+ evento:{n:"Encontro",d:"Alguém precisa de ajuda. Risco e recompensa.",ic:'<circle cx="16" cy="16" r="11"/><path d="M16 9v9M16 22v1"/>'},
+ mercador:{n:"Mercador",d:"Peça uma runa em inglês e leve para a batalha.",ic:'<path d="M6 12h20l-2 14H8z"/><path d="M11 12a5 5 0 0 1 10 0"/>'}};
+let EXP=null;
+function expHero(){ const n=(NAMES[0]||"").trim()||"Herói 1"; return {name:n,key:hkey(n),cls:heroCls[0],learn:{},speaks:0,fails:0,charge:0}; }
+function startExpedition(s){
+  const pick=(arr,k)=>shuffle(arr.slice()).slice(0,k);
+  const rows=[pick(["taverna","treino","evento"],2),shuffle(["mercador",rnd(["taverna","evento","treino"])]),pick(["taverna","treino","evento"],2)];
+  EXP={s,rows,row:0,chosen:[],cor:100,focus:5,relics:[],H:expHero()};
+  G={exp:true,sess:Date.now(),over:false,heroes:[EXP.H],focus:5,cor:100,fog:0,solo:true,comp:[],B:{},timer:9};
+  preloadChap(s.ck); paintExpedition(); show("expedition");
+}
+function expStatus(){ return '<div class="ex-stat"><span>Coragem <b>'+EXP.cor+'</b>/100</span><span>Foco <b>'+EXP.focus+'</b></span><span>Runas <b>'+EXP.relics.length+'</b></span></div>'+
+  (EXP.relics.length?'<div class="ex-relics">'+EXP.relics.map(k=>'<span style="--rc:'+RELICS[k].c+'" title="'+esc(RELICS[k].d)+'">'+esc(RELICS[k].n)+'</span>').join("")+'</div>':''); }
+function nodeIcon(k){ return '<svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+NODES[k].ic+'</svg>'; }
+function paintExpedition(){
+  const B=CHAPTERS[EXP.s.ck].bosses[EXP.s.bi]; $("ex-title").textContent="Caminho até o chefão";
+  let h=expStatus()+'<div class="ex-path">';
+  h+='<div class="ex-boss'+(EXP.row>=3?' ready':'')+'"><div class="act-portrait">'+B.art()+'</div><div><div class="tag">'+esc(B.act)+' · '+esc(CHAPTERS[EXP.s.ck].short)+'</div><b class="display">'+esc(B.name)+'</b>'+(EXP.row>=3?'<button type="button" class="primary" id="ex-fight">Enfrentar o chefão</button>':'<p class="intro">Escolha um caminho em cada trecho para chegar até aqui.</p>')+'</div></div>';
+  for(let r=2;r>=0;r--){ h+='<div class="ex-row'+(r===EXP.row?' now':r<EXP.row?' past':'')+'"><span class="ex-step">Trecho '+(r+1)+'</span><div class="ex-nodes">'+EXP.rows[r].map((k,i)=>{ const ch=EXP.chosen[r]===i, off=r<EXP.row&&!ch;
+      return '<button type="button" class="ex-node'+(ch?' chosen':'')+(off?' off':'')+'" data-r="'+r+'" data-i="'+i+'"'+(r===EXP.row?'':' disabled')+'>'+nodeIcon(k)+'<b>'+esc(NODES[k].n)+'</b><small>'+esc(NODES[k].d)+'</small></button>'; }).join("")+'</div></div>'; }
+  h+='</div>';
+  $("ex-body").innerHTML=h;
+  $("ex-body").querySelectorAll(".ex-node:not([disabled])").forEach(b=>b.onclick=()=>{ sfx.card(); const r=+b.dataset.r, i=+b.dataset.i; EXP.chosen[r]=i; runNode(EXP.rows[r][i],()=>{ EXP.row++; G.focus=EXP.focus; G.cor=EXP.cor; paintExpedition(); }); });
+  const f=$("ex-fight"); if(f) f.onclick=()=>{ sfx.roar(); EXP.pending=true; startBattle(EXP.s.bi); };
+}
+function expGain(cor,foc,msg){ EXP.cor=Math.max(1,Math.min(100,EXP.cor+cor)); EXP.focus=Math.max(0,Math.min(8,EXP.focus+foc)); if(msg) setLog(msg); }
+function expDone(then,title,text,ok){ openSheet({chip:title,color:ok?"#5CC4B4":"#C8464F",who:"Expedição",task:text,buttons:[{label:"Seguir viagem",cls:"go",full:true,fn:()=>{ closeSheet(); then(); }}]}); ok?sfx.heal():sfx.bad(); }
+function expItemPool(){ const it=LD().items; return it.length?it:CH4.items; }
+function runNode(k,then){ const H=EXP.H;
+  if(k==="taverna"){ const D=(LD().dialogs&&LD().dialogs.length?LD().dialogs:CH4.dialogs); const d=rnd(D);
+    openSheet({chip:"Taverna",color:"#E5873A",open:true,who:"Um viajante puxa conversa",task:d.a[0],lang:"en",autoSay:d.a[0],secs:20,hint:"Responda em inglês, do seu jeito. (Ele disse: "+d.a[1]+")",
+      kitHTML:'<button type="button" class="bigplay" id="tv-play">'+playSvg()+'<span>Ouvir de novo</span></button><button type="button" class="ghost" id="tv-rev">Ver uma resposta possível</button><p class="k-ans" id="tv-ans" hidden lang="en">'+esc(d.b[0])+'</p>',
+      bindKit:box=>{ box.querySelector("#tv-play").onclick=()=>speak(d.a[0],true); box.querySelector("#tv-rev").onclick=e=>{ box.querySelector("#tv-ans").hidden=false; e.target.hidden=true; speak(d.b[0],false); }; },
+      buttons:[{label:"Conversei",cls:"yes",fn:()=>{ closeSheet(); expGain(10,2); expDone(then,"Boa conversa!","O viajante pagou uma bebida e contou um segredo do caminho. +10 de Coragem, +2 de Foco.",true); }},
+               {label:"Travei",cls:"no",fn:()=>{ closeSheet(); expDone(then,"Conversa curta","O viajante sorriu e voltou para a mesa dele. Sem prêmio desta vez.",false); }}]}); return; }
+  if(k==="treino"){ let n=0, ok=0; const next=()=>{ if(n>=2){ expGain(8+ok*8,ok?1:0); expDone(then,"Descanso na fogueira",ok+" de 2 frases certas. Coragem recuperada: +"+(8+ok*8)+".",true); return; }
+      n++; const it=pickItem(H), r=(MST[H.key]||{})[it.id], step=Math.max(2,Math.min(5,r?r.s+ (r.ok>=1?1:0):2));
+      ladderCard(H,it,step,(good,help)=>{ recordResult(H,it,step,good,help); if(good) ok++; closeSheet(); next(); },{chip:"Fogueira · "+n+" de 2",who:H.name,failSub:"a frase vai voltar"}); };
+    next(); return; }
+  if(k==="evento"){ const pool=expItemPool().filter(x=>x.sit), it=rnd(pool);
+    openSheet({chip:"Encontro",color:"#8D6FD1",who:"Alguém precisa de ajuda",task:it.sit,secs:20,expect:it.en,hint:"Responda em inglês. Ajudar dá uma runa. Travar custa Coragem.",
+      kitHTML:'<div class="item-row">'+icon(it.icon,46,"#c9b8ff")+'<p class="k-tr">Ideia: '+esc(it.pt)+'</p></div><button type="button" class="ghost" id="ev-rev">Ver a resposta (sem runa)</button><p class="k-model" id="ev-ans" hidden lang="en">'+esc(it.en)+'</p>',
+      bindKit:box=>{ box.querySelector("#ev-rev").onclick=e=>{ box.querySelector("#ev-ans").hidden=false; e.target.hidden=true; speak(it.en,false); EXP.peek=true; }; },
+      buttons:[{label:"Ajudei",cls:"yes",fn:()=>{ closeSheet(); recordResult(H,it,5,true,!!EXP.peek); const peek=EXP.peek; EXP.peek=false;
+          if(peek){ expGain(5,0); expDone(then,"Ajudou com uma colinha","A pessoa agradeceu. +5 de Coragem.",true); return; }
+          const opts=Object.keys(RELICS).filter(x=>!EXP.relics.includes(x)); const g=rnd(opts); if(g) EXP.relics.push(g);
+          expDone(then,"Gratidão!",g?"Em agradecimento, você ganhou a "+RELICS[g].n+": "+RELICS[g].d:"Você ganhou +15 de Coragem.",true); if(!g) expGain(15,0); }},
+        {label:"Travei",cls:"no",fn:()=>{ closeSheet(); recordResult(H,it,5,false,false); EXP.peek=false; expGain(-15,0); expDone(then,"Não deu","A situação piorou e a guilda perdeu 15 de Coragem.",false); }}]}); return; }
+  if(k==="mercador"){ const opts=shuffle(Object.keys(RELICS).filter(x=>!EXP.relics.includes(x))).slice(0,2);
+    const buy=key=>{ closeSheet(); const R=RELICS[key], line="I'd like "+R.en+", please.";
+      openSheet({chip:"Mercador",color:"#C9A45C",who:R.n,task:"Peça em inglês: “Eu queria a "+R.n.toLowerCase()+", por favor.”",expect:line,secs:20,hint:"Fale o pedido inteiro. O mercador só vende para quem pede direito.",
+        kitHTML:'<p class="k-tr">Comece com <b lang="en">I\'d like…</b> e termine com <b lang="en">please</b>. O nome da runa em inglês é <b lang="en">'+esc(R.en)+'</b>.</p><button type="button" class="ghost" id="mc-rev">Ver o pedido</button><p class="k-model" id="mc-ans" hidden lang="en">'+esc(line)+'</p>',
+        bindKit:box=>{ box.querySelector("#mc-rev").onclick=e=>{ box.querySelector("#mc-ans").hidden=false; e.target.hidden=true; speak(line,false); }; },
+        buttons:[{label:"Pedi",cls:"yes",fn:()=>{ closeSheet(); EXP.relics.push(key); expDone(then,"Negócio fechado!","Você levou a "+R.n+": "+R.d,true); }},
+                 {label:"Travei",cls:"no",fn:()=>{ closeSheet(); expDone(then,"O mercador não entendeu","Ele deu de ombros e guardou a runa. Fica para a próxima.",false); }}]}); };
+    openSheet({chip:"Mercador",color:"#C9A45C",who:"Runas à venda",task:"What would you like?",lang:"en",autoSay:"What would you like?",hint:"Escolha uma runa. Depois, peça em inglês.",
+      kitHTML:'<div class="ex-shop">'+opts.map(x=>'<button type="button" data-rl="'+x+'" style="--rc:'+RELICS[x].c+'"><b>'+esc(RELICS[x].n)+'</b><small>'+esc(RELICS[x].d)+'</small></button>').join("")+'</div>',
+      bindKit:box=>box.querySelectorAll("[data-rl]").forEach(b=>b.onclick=()=>{ sfx.pick(); buy(b.dataset.rl); }),
+      buttons:[{label:"Seguir sem comprar",cls:"no",full:true,fn:()=>{ closeSheet(); then(); }}]}); return; }
+  then();
+}
+function applyExpedition(){ if(!EXP||!EXP.pending) return; EXP.pending=false;
+  G.cor=EXP.cor; G.focus=EXP.focus; G.dmgMul=1; G.compMul=1; const R=EXP.relics;
+  if(R.includes("eco")) G.dmgMul*=1.2; if(R.includes("sangue")){ G.dmgMul*=1.4; G.max=G.hp=Math.round(G.max*1.25); }
+  if(R.includes("escudo")) G.shield=true; if(R.includes("tempo")) G.timer+=2; if(R.includes("foco")) G.focus=Math.min(8,G.focus+3); if(R.includes("amizade")) G.compMul=2;
+  G.relics=R.slice(); if(R.length) setLog("Runas da expedição ativas: "+R.map(k=>RELICS[k].n).join(", ")+"."); EXP=null; }
 
 const CHAPTERS={
  c0:{short:"Capítulo 0",label:"Capítulo 0 · Primeiras palavras",title:"O primeiro sussurro",ladder:true,data:CH0,unit:["palavra","palavras"],desc:"Para quem começa do zero. Cada herói joga no próprio degrau: ouvir e tocar, repetir, escolher, lembrar e usar. O jogo guarda o progresso de cada aluno neste aparelho.",
@@ -1937,8 +2038,9 @@ paintSetup(); paintPhase(); paintChap(); paintMode();
 document.querySelectorAll("#modesel button").forEach(b=>b.onclick=()=>{ sfx.pick(); setMode(b.dataset.m==="solo"); });
 $("camp-open").onclick=()=>{ sfx.pick(); openSlots(); }; paintSlotBar(); tour("setup");
 { const _pr=paintRegion; paintRegion=function(){ _pr.apply(this,arguments); try{ preloadChap(REGIONS[selR].ch); }catch(e){} if(tutSeen().map&&!$("map").hidden&&document.querySelector("#space-detail [data-st]")) tour("region"); }; }
-function show(id){ ["setup","atlas","map","battle","journey","grimoire"].forEach(s=>$(s).hidden=s!==id); window.scrollTo(0,0); if(TOURS[id]) tour(id); }
+function show(id){ ["setup","atlas","expedition","map","battle","journey","grimoire"].forEach(s=>$(s).hidden=s!==id); window.scrollTo(0,0); if(TOURS[id]) tour(id); }
 $("to-map").onclick=()=>{ ac(); if(!sagaSeen()) return openSaga(()=>openAtlas()); sfx.card(); openAtlas(); };
+$("ex-quit").onclick=()=>{ EXP=null; G=null; sfx.pick(); if(CH().isle) openAtlas(); else { paintMap(); show("map"); } };
 $("to-atlas").onclick=()=>{ sfx.card(); openAtlas(); };
 $("atlas-back").onclick=()=>show("setup");
 $("back-setup").onclick=()=>show("setup");
@@ -2134,7 +2236,7 @@ function paintRegion(){
   box.innerHTML=h+'</div>';
   box.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{ const s=sp[+b.dataset.st]; startFromRegion(s); });
 }
-function startFromRegion(s){ chapKey=s.ck; BOSSES=CH().bosses; try{localStorage.setItem(LK("vx-chap"),chapKey);}catch(e){} firstDayGate(()=>{ if(progress.wins>=progress.megaAt) return startMega(s.ck); startBattle(s.bi); }); }
+function startFromRegion(s){ chapKey=s.ck; BOSSES=CH().bosses; try{localStorage.setItem(LK("vx-chap"),chapKey);}catch(e){} firstDayGate(()=>{ if(progress.wins>=progress.megaAt) return startMega(s.ck); if(SOLO) startExpedition(s); else startBattle(s.bi); }); }
 /* a bell rings when the last guardian of a region falls */
 function checkBell(){ const ri=REGIONS.findIndex(R=>R.ch===chapKey); if(ri<0||progress.bells[REGIONS[ri].id]||!regionDone(ri)) return null; progress.bells[REGIONS[ri].id]=true; saveProgress(); return REGIONS[ri]; }
 function ringBell(R,then){
@@ -2266,7 +2368,7 @@ function startBattle(bi){
   G={bi,B,max:bossMaxHp(B),hp:bossMaxHp(B),cor:100,focus:5,timer:B.every,pi:0,nextAtk:B.pattern[0],shield:false,fog:0,allyx2:false,bard:0,over:false,actions:0,
      heroes:[...Array(count).keys()].map(i=>({name:(NAMES[i]||"").trim()||("Herói "+(i+1)),key:hkey((NAMES[i]||"").trim()||("Herói "+(i+1))),start:heroStart[i]||1,learn:{},cls:heroCls[i],charge:0,speaks:0,dmg:0,support:0,defend:0,fails:0,chained:false,selfx2:false})),
      cur:0};
-  G.cur=pickNext(-1); G.solo=SOLO; G.comp=SOLO?COMPANIONS.map(c=>Object.assign({},c)):[]; G.compI=0; G.sess=Date.now(); G.snap0={}; G.heroes.forEach(h=>{ G.snap0[h.key]=journeyStats(h.key); });
+  G.cur=pickNext(-1); G.solo=SOLO; G.comp=SOLO?COMPANIONS.map(c=>Object.assign({},c)):[]; G.compI=0; G.sess=Date.now(); applyExpedition(); G.snap0={}; G.heroes.forEach(h=>{ G.snap0[h.key]=journeyStats(h.key); });
   $("b-act").textContent=B.act+" · "+CH().short; $("b-name").textContent=B.name;
   $("b-art").innerHTML=B.art(); $("b-wrap").classList.remove("dead");
   show("battle"); paint(true);
@@ -2294,6 +2396,7 @@ function pickNext(prev){
 }
 function setLog(t){ $("log").textContent=t; }
 function paint(first){
+  if(G&&G.exp) return;
   const B=G.B, pct=Math.max(0,G.hp)/G.max*100;
   $("b-hp-fill").style.setProperty("--w",pct+"%"); setTimeout(()=>$("b-hp-ghost").style.setProperty("--w",pct+"%"), first?0:50);
   $("b-hp-txt").textContent=Math.max(0,G.hp)+" / "+G.max; $("b-hpnum").textContent="Vida do chefão";
@@ -2460,6 +2563,7 @@ function nextHero(){ if(checkEnd()) return; if(G.solo&&G.npcDue&&!G.over&&G.comp
 /* ---------- boss effects ---------- */
 function floatText(txt,cls,sub){ const w=$("b-wrap"); const d=document.createElement("div"); d.className="dmg "+(cls||""); d.innerHTML=esc(txt)+(sub?'<small>'+esc(sub)+'</small>':''); w.appendChild(d); setTimeout(()=>d.remove(),1150); }
 function hitBoss(d,crit,boosted){
+  d=Math.round(d*((G&&G.dmgMul)||1));
   G.hp=Math.max(0,G.hp-d);
   const w=$("b-wrap"); w.classList.remove("hit"); void w.offsetWidth; w.classList.add("hit");
   const s=document.createElement("div"); s.className="slash"+(crit?" crit":""); s.innerHTML='<svg viewBox="0 0 240 240"><path d="'+rnd(["M30 60 L210 180","M210 50 L40 190","M20 120 Q120 90 220 130"])+'"/>'+(crit?'<path d="M40 190 L200 40" style="animation-delay:.1s"/>':'')+'</svg>'; w.appendChild(s); setTimeout(()=>s.remove(),700);
