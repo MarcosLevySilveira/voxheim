@@ -1799,7 +1799,7 @@ function paintAtlasDetail(){ const W=WORLD.find(w=>w.id===atSel), op=worldOpen(W
   h+='<div class="label" style="margin-top:4px">O que se aprende aqui</div><div class="at-chips">'+W.learn.map(x=>'<span>'+esc(x)+'</span>').join("")+'</div>';
   if(op&&W.ch){ const C=CHAPTERS[W.ch], sp=C.bosses.map((B,bi)=>({ck:W.ch,bi,B})); const nd=sp.filter(x=>progress.cleared[x.B.id]).length;
     h+='<div class="at-prog"><i style="width:'+Math.round(nd/sp.length*100)+'%"></i></div><p class="intro">'+nd+' de '+sp.length+' guardiões vencidos.</p><div class="stages">';
-    sp.forEach((x,i)=>{ const done=!!progress.cleared[x.B.id], can=i===0||!!progress.cleared[sp[i-1].B.id];
+    sp.forEach((x,i)=>{ const done=!!progress.cleared[x.B.id], can=UNLOCK||i===0||!!progress.cleared[sp[i-1].B.id];
       h+='<div class="stage'+(done?' done':'')+(can?'':' locked')+'"><div class="act-portrait">'+x.B.art()+'</div><div><div class="tag">'+esc(x.B.act)+(done?' · vencido':'')+'</div><b class="display">'+esc(x.B.name)+'</b><p class="intro">'+esc(x.B.lore)+(WEAK[x.B.id]?' <span class="tchip" style="--t:'+TYPES[WEAK[x.B.id]].c+'">fraco contra '+TYPES[WEAK[x.B.id]].n+'</span>':'')+'</p><button type="button" data-ist="'+i+'"'+(can?'':' disabled')+'>'+(done?'Enfrentar de novo':can?'Enfrentar':'Trancado')+'</button></div></div>'; });
     h+='</div>'; box.innerHTML=h; preloadChap(W.ch);
     box.querySelectorAll("[data-ist]").forEach(b=>b.onclick=()=>startFromRegion(sp[+b.dataset.ist])); return; }
