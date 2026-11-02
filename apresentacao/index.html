@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Voxheim · O RPG que faz a turma falar inglês</title>
+<meta name="description" content="Voxheim transforma a aula de inglês numa campanha de RPG. Cada frase dita em voz alta é um golpe contra os chefões do Silêncio. Do A1 ao B2, em grupo ou sozinho.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Voxheim · O RPG que faz a turma falar inglês">
+<meta property="og:description" content="Uma campanha de RPG em que cada frase falada em inglês é um golpe. Para professores, escolas e quem trava na hora de falar.">
+<meta property="og:image" content="https://marcoslevysilveira.github.io/voxheim/apresentacao/og.png">
+<meta property="og:url" content="https://marcoslevysilveira.github.io/voxheim/apresentacao/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0D0C11">
+<link rel="icon" href="../favicon.png">
+<link rel="preload" href="fonts/fell.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:"IM Fell English SC";src:url(fonts/fell.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"Instrument Sans";font-weight:400;src:url(fonts/is-400.woff2) format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Instrument Sans";font-weight:400;src:url(fonts/is-ext-400.woff2) format("woff2");font-display:swap;unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Instrument Sans";font-weight:600;src:url(fonts/is-600.woff2) format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Instrument Sans";font-weight:600;src:url(fonts/is-ext-600.woff2) format("woff2");font-display:swap;unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Instrument Sans";font-weight:700;src:url(fonts/is-700.woff2) format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Instrument Sans";font-weight:700;src:url(fonts/is-ext-700.woff2) format("woff2");font-display:swap;unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+:root{--void:#0D0C11;--stone:#17151D;--slab:#211E29;--line:#363140;--bone:#EEE6D3;--ash:#A69D8E;--gold:#C9A45C;--gold2:#f2c46a;--blood:#C8464F;--arcane:#5CC4B4;--violet:#8D6FD1;
+ --display:"IM Fell English SC",Garamond,Georgia,serif;--body:"Instrument Sans","Helvetica Neue",Arial,sans-serif;--w:1120px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--void);color:var(--bone);font:16px/1.6 var(--body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}img{max-width:100%;display:block}
+.wrap{max-width:var(--w);margin:0 auto;padding:0 20px}
+h1,h2,h3{font-family:var(--display);font-weight:400;line-height:1.08;margin:0}
+h2{font-size:clamp(30px,4.4vw,48px)}h3{font-size:24px}
+.kick{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:600}
+.lead{font-size:clamp(17px,1.6vw,20px);color:#d8cfbd;max-width:640px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 26px;font:600 16px var(--body);text-decoration:none;border:1px solid var(--gold);transition:transform .15s,background .2s}
+.btn:hover{transform:translateY(-2px)}.btn.primary{background:linear-gradient(135deg,#e9c983,var(--gold));color:#1a140a;border-color:#e9c983}
+.btn.ghost{color:var(--gold);background:rgba(201,164,92,.06)}
+.btn:focus-visible{outline:2px solid var(--gold2);outline-offset:3px}
+/* nav */
+nav{position:sticky;top:0;z-index:10;background:rgba(13,12,17,.82);backdrop-filter:blur(10px);border-bottom:1px solid rgba(54,49,64,.6)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}.brand b{font-family:var(--display);font-weight:400;font-size:24px;color:var(--gold);letter-spacing:.06em}
+.brand span{width:34px;height:34px;border-radius:50%;border:1px solid var(--gold);display:grid;place-items:center;font-family:var(--display);font-size:12px;color:var(--gold)}
+nav .links{display:flex;gap:22px;align-items:center;font-size:14px;color:var(--ash)}nav .links a{text-decoration:none}nav .links a:hover{color:var(--bone)}
+nav .btn{min-height:40px;padding:0 16px;font-size:14px}
+@media (max-width:760px){nav .links a:not(.btn){display:none}}
+/* hero */
+.hero{position:relative;padding:72px 0 56px;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:-20% -10% auto;height:120%;background:radial-gradient(60% 50% at 70% 30%,rgba(141,111,209,.22),transparent 70%),radial-gradient(40% 40% at 20% 10%,rgba(201,164,92,.14),transparent 70%);pointer-events:none}
+.hero .wrap{position:relative;display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center}
+.hero h1{font-size:clamp(44px,6.6vw,84px);margin:14px 0 18px}.hero h1 em{font-style:normal;color:var(--gold2)}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin:28px 0 18px}
+.trust{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;color:var(--ash)}.trust span::before{content:"✦";color:var(--gold);margin-right:7px}
+.phones{position:relative;height:560px}
+.phone{position:absolute;width:250px;border-radius:30px;padding:9px;background:linear-gradient(160deg,#3a3448,#14121a);box-shadow:0 30px 60px rgba(0,0,0,.6),0 0 0 1px #4a4458 inset}
+.phone img{border-radius:22px;width:100%}
+.phone.a{right:4%;top:0;z-index:2;transform:rotate(3deg)}.phone.b{left:0;top:70px;transform:rotate(-6deg);opacity:.92}
+@media (max-width:900px){.hero .wrap{grid-template-columns:1fr}.phones{height:470px;max-width:420px;margin:0 auto;width:100%}.phone{width:210px}.phone.a{right:4%}.phone.b{left:6%}}
+/* sections */
+section{padding:84px 0}section.alt{background:linear-gradient(180deg,var(--stone),var(--void))}
+.head{max-width:720px;margin-bottom:40px}.head h2{margin:10px 0 14px}
+.pain{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.pain div{border:1px solid var(--line);background:var(--slab);padding:22px}.pain b{display:block;font-family:var(--display);font-weight:400;font-size:22px;color:var(--gold2);margin-bottom:6px}.pain p{margin:0;color:#cfc6b4;font-size:15px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;counter-reset:s}
+.step{position:relative;border-top:2px solid var(--gold);padding:22px 52px 0 4px}.step::before{counter-increment:s;content:counter(s);font-family:var(--display);font-size:56px;color:rgba(201,164,92,.35);position:absolute;right:6px;top:4px}
+.step h3{margin-bottom:8px}.step p{margin:0;color:#cfc6b4}
+.feat{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.f{border:1px solid var(--line);background:linear-gradient(180deg,var(--slab),var(--stone));padding:24px}
+.f svg{width:34px;height:34px;stroke:var(--gold);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-bottom:14px}
+.f h3{font-size:22px;margin-bottom:8px}.f p{margin:0;color:#cfc6b4;font-size:15px}
+@media (max-width:860px){.pain,.steps,.feat{grid-template-columns:1fr}}
+/* showcase */
+.show{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.card{display:flex;flex-direction:column;gap:14px}.card .phone{position:relative;width:100%;max-width:260px;margin:0 auto;transform:none}
+.card h3{font-size:22px}.card p{margin:0;color:#cfc6b4;font-size:15px}
+@media (max-width:860px){.show{grid-template-columns:1fr;max-width:380px;margin:0 auto}}
+.shots{display:flex;gap:18px;overflow-x:auto;padding:8px 2px 18px;scroll-snap-type:x mandatory}
+.shots figure{margin:0;flex:0 0 220px;scroll-snap-align:start}.shots img{border-radius:18px;border:1px solid var(--line)}.shots figcaption{font-size:13px;color:var(--ash);margin-top:8px}
+/* journey */
+.books{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.book{border:1px solid var(--line);padding:18px;background:var(--slab);min-height:180px;display:flex;flex-direction:column;gap:6px}
+.book .lv{font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--gold)}.book h3{font-size:20px}.book p{margin:0;font-size:13.5px;color:var(--ash)}
+.book .st{margin-top:auto;font-size:12px;font-weight:600}.book.on{border-color:var(--gold)}.book.on .st{color:#6fdba0}.book.soon{opacity:.6}.book.soon .st{color:var(--ash)}
+@media (max-width:900px){.books{grid-template-columns:1fr 1fr}}@media (max-width:520px){.books{grid-template-columns:1fr}}
+/* audience */
+.aud{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.aud div{border:1px solid var(--line);padding:26px;background:var(--slab)}.aud h3{margin-bottom:10px}.aud ul{margin:0;padding-left:18px;color:#cfc6b4;font-size:15px}.aud li{margin:6px 0}
+@media (max-width:860px){.aud{grid-template-columns:1fr}}
+/* comparison */
+.tbl{overflow-x:auto;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;min-width:720px;font-size:14.5px}
+th,td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--ash);font-size:13px;letter-spacing:.04em;background:var(--stone)}
+td:first-child{color:var(--ash)}th.vx,td.vx{background:rgba(201,164,92,.08);color:var(--bone)}th.vx{color:var(--gold2)}
+.y{color:#6fdba0}.n{color:#8a8494}
+/* faq */
+details{border-bottom:1px solid var(--line);padding:18px 0}summary{cursor:pointer;font-weight:600;font-size:17px;list-style:none;display:flex;justify-content:space-between;gap:16px}
+summary::after{content:"+";color:var(--gold);font-size:22px;line-height:1}details[open] summary::after{content:"–"}details p{margin:10px 0 0;color:#cfc6b4;max-width:760px}
+/* final */
+.final{text-align:center;padding:96px 0;background:radial-gradient(50% 60% at 50% 40%,rgba(201,164,92,.16),transparent 70%)}
+.final h2{max-width:780px;margin:12px auto 18px}.final .lead{margin:0 auto}.final .cta{justify-content:center}
+footer{border-top:1px solid var(--line);padding:28px 0;color:var(--ash);font-size:13px}footer .wrap{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<nav><div class="wrap"><a class="brand" href="#topo"><span>F·A</span><b>Voxheim</b></a>
+ <div class="links"><a href="#como">Como funciona</a><a href="#jornada">Jornada</a><a href="#para-quem">Para quem</a><a href="#perguntas">Perguntas</a><a class="btn primary" href="../">Jogar agora</a></div></div></nav>
+
+<header class="hero" id="topo"><div class="wrap">
+ <div>
+  <div class="kick">Método Fluência Ativa</div>
+  <h1>O RPG que faz a turma <em>falar</em> inglês.</h1>
+  <p class="lead">Voxheim transforma a aula numa campanha de fantasia. Cada frase dita em voz alta é um golpe contra os chefões do Silêncio. Quem trava, perde coragem. Quem fala, vence.</p>
+  <div class="cta"><a class="btn primary" href="../">Jogar a demonstração</a><a class="btn ghost" href="#para-quem" data-contact>Levar para a minha turma</a></div>
+  <div class="trust"><span>Do A1 ao B2</span><span>Em grupo ou sozinho</span><span>Funciona sem internet</span><span>Feito para o aluno brasileiro</span></div>
+ </div>
+ <div class="phones" aria-hidden="true">
+  <div class="phone b"><img src="img/atlas.webp" alt="" width="390" height="844"></div>
+  <div class="phone a"><img src="img/batalha.webp" alt="" width="390" height="844"></div>
+ </div>
+</div></header>
+
+<section class="alt"><div class="wrap">
+ <div class="head"><div class="kick">O problema</div><h2>O brasileiro estuda inglês por anos e trava na hora de falar.</h2>
+ <p class="lead">Não falta conteúdo. Falta repetição falada, com pressão de verdade, num lugar onde errar é parte do jogo.</p></div>
+ <div class="pain">
+  <div><b>Aulas que viram leitura</b><p>O aluno entende, completa exercícios, acerta a prova, e mesmo assim não abre a boca.</p></div>
+  <div><b>Apps que viram rotina</b><p>Tocar na resposta certa todo dia gera sequência de dias, mas pouca fala de verdade.</p></div>
+  <div><b>Erros que nunca somem</b><p>“I have 30 years”, “I am agree”, o “i” no fim das palavras. Os erros de quem fala português pedem treino próprio.</p></div>
+ </div>
+</div></section>
+
+<section id="como"><div class="wrap">
+ <div class="head"><div class="kick">Como funciona</div><h2>Uma campanha. Uma guilda. Muitas frases ditas em voz alta.</h2></div>
+ <div class="steps">
+  <div class="step"><h3>Monte a guilda</h3><p>De 2 a 4 alunos e um professor, num celular ou numa TV. Cada aluno escolhe uma classe e entra no Reino de Voxheim.</p></div>
+  <div class="step"><h3>Fale para atacar</h3><p>Ouvir, repetir, montar a frase, responder sem modelo. Cada degrau de fala vira dano. Os chefões contra-atacam com os erros típicos do brasileiro.</p></div>
+  <div class="step"><h3>Ouça a própria evolução</h3><p>No primeiro dia, cada aluno grava a própria voz. No fim de cada livro, grava de novo: o <b>Momento Miyagi</b> mostra o quanto ele mudou.</p></div>
+ </div>
+</div></section>
+
+<section class="alt"><div class="wrap">
+ <div class="head"><div class="kick">O que o Voxheim tem de diferente</div><h2>Fala de verdade, com consequência.</h2></div>
+ <div class="feat">
+  <div class="f"><svg viewBox="0 0 32 32"><circle cx="11" cy="11" r="4"/><circle cx="22" cy="11" r="4"/><path d="M4 26c0-5 3-8 7-8s7 3 7 8M15 26c0-5 3-8 7-8s7 3 7 8"/></svg><h3>Feito para a sala de aula</h3><p>Um jogo cooperativo em grupo, raro entre os apps de inglês. O professor conduz e a turma joga junta.</p></div>
+  <div class="f"><svg viewBox="0 0 32 32"><path d="M6 8h20v13H14l-6 5v-5H6z"/><path d="M11 13h10M11 17h6"/></svg><h3>Os erros do brasileiro</h3><p>Cada capítulo ataca os tropeços de quem fala português: o “I am agree”, o “I have 30 years”, o “should have went”, o “cook-ed”.</p></div>
+  <div class="f"><svg viewBox="0 0 32 32"><path d="M10 13a6 6 0 0 1 12 0c0 4-4 5-4 9a3 3 0 0 1-6 0"/><path d="M26 8c1 2 1 6 0 8"/></svg><h3>Pronúncia que se ouve</h3><p>O Eco escreve o que entendeu: diga “sink” querendo “think” e ele afunda a guilda. O Espelho compara a melodia da sua voz com a do modelo.</p></div>
+  <div class="f"><svg viewBox="0 0 32 32"><circle cx="16" cy="11" r="5"/><path d="M8 27c0-5 4-8 8-8s8 3 8 8"/></svg><h3>Também sozinho</h3><p>No modo solo, dois companheiros erram de propósito para o aluno corrigir, e o reconhecimento de fala confere o que ele disse.</p></div>
+  <div class="f"><svg viewBox="0 0 32 32"><path d="M16 4l10 4v8c0 6-4 10-10 12C10 26 6 22 6 16V8z"/><path d="M12 16l3 3 5-6"/></svg><h3>Funciona sem internet</h3><p>Abre no navegador, instala como app no celular e funciona offline. Sem cadastro e sem baixar nada da loja.</p></div>
+  <div class="f"><svg viewBox="0 0 32 32"><path d="M4 26l8-12 6 7 4-5 6 10z"/><circle cx="23" cy="8" r="3"/></svg><h3>Uma jornada inteira</h3><p>Do primeiro “I am” até debater uma ideia, em três livros, 21 capítulos, uma ilha extra e mais de 60 chefões.</p></div>
+ </div>
+</div></section>
+
+<section><div class="wrap">
+ <div class="head"><div class="kick">Por dentro do jogo</div><h2>Cada capítulo tem uma mecânica nova.</h2><p class="lead">Não é a mesma lição repetida com outra cor. Cada chefão final pede um jeito diferente de falar.</p></div>
+ <div class="show">
+  <div class="card"><div class="phone"><img src="img/eco.webp" alt="Tela do Eco Torto: o aluno disse they, o Eco entendeu day e mostra a dica de pronúncia" width="390" height="844" loading="lazy"></div><h3>O Eco Torto</h3><p>O aluno fala para o Eco, e o Eco mostra o que entendeu. “Ele entendeu day. Você queria they.” A dica de como pôr a boca aparece na hora.</p></div>
+  <div class="card"><div class="phone"><img src="img/espelho.webp" alt="Tela do Espelho: a linha da melodia do modelo e a do aluno sobrepostas" width="390" height="844" loading="lazy"></div><h3>O Espelho da Montanha</h3><p>O aluno grava a frase e vê a melodia da própria voz sobre a do modelo. A pergunta subiu ou desceu no fim? O ritmo ficou parecido?</p></div>
+  <div class="card"><div class="phone"><img src="img/debate.webp" alt="Tela do Debate da Montanha com os papéis a favor, contra e conclusão" width="390" height="844" loading="lazy"></div><h3>O Debate da Montanha</h3><p>Um aluno defende a ideia, outro discorda com educação, outro conclui. Cada ferramenta usada (because, however, all things considered) aumenta o dano.</p></div>
+ </div>
+ <div class="shots" style="margin-top:44px" aria-label="Mais telas do jogo">
+  <figure><img src="img/chefe.webp" alt="Chefão O Grande Eco" width="390" height="844" loading="lazy"><figcaption>Os chefões chegam com cena própria</figcaption></figure>
+  <figure><img src="img/mapa.webp" alt="Mapa do Livro III" width="390" height="844" loading="lazy"><figcaption>Um mapa por livro, sete sinos para tocar</figcaption></figure>
+  <figure><img src="img/jornal.webp" alt="Plantão do Arauto em voz passiva" width="390" height="844" loading="lazy"><figcaption>Voz passiva como plantão de jornal</figcaption></figure>
+  <figure><img src="img/boato.webp" alt="O Desmentido em reported speech" width="390" height="844" loading="lazy"><figcaption>Reported speech desmentindo boatos</figcaption></figure>
+  <figure><img src="img/miyagi.webp" alt="Momento Miyagi no fim do Livro III" width="390" height="844" loading="lazy"><figcaption>Momento Miyagi: a voz de antes e a de agora</figcaption></figure>
+ </div>
+</div></section>
+
+<section class="alt" id="jornada"><div class="wrap">
+ <div class="head"><div class="kick">A jornada</div><h2>Um mundo inteiro, do A1 ao C2.</h2><p class="lead">Cada livro é um continente no Atlas de Voxheim, com sete regiões e um chefão final. Três já estão prontos para jogar.</p></div>
+ <div class="books">
+  <div class="book on"><span class="lv">LIVRO I · A1–A2</span><h3>O Reino de Voxheim</h3><p>Apresentar-se, rotina, passado, futuro. Termina no Grande Silêncio.</p><span class="st">Pronto para jogar</span></div>
+  <div class="book on"><span class="lv">LIVRO II · B1</span><h3>O Arquipélago das Marés</h3><p>Present perfect, comparações, conselhos, condicionais, phrasal verbs.</p><span class="st">Pronto para jogar</span></div>
+  <div class="book on"><span class="lv">LIVRO III · B2</span><h3>A Cordilheira das Vozes Partidas</h3><p>Pronúncia, conditionals, voz passiva, reported speech e debate.</p><span class="st">Pronto para jogar</span></div>
+  <div class="book soon"><span class="lv">LIVRO IV · C1</span><h3>A Cidade dos Mil Espelhos</h3><p>Expressões, registro formal e informal, nuance, negociação.</p><span class="st">Em produção</span></div>
+  <div class="book soon"><span class="lv">LIVRO V · C2</span><h3>O Céu de Lyra</h3><p>Fluência plena, estilo e a última batalha pela própria voz.</p><span class="st">Em produção</span></div>
+ </div>
+</div></section>
+
+<section id="para-quem"><div class="wrap">
+ <div class="head"><div class="kick">Para quem</div><h2>Para quem ensina e para quem quer destravar.</h2></div>
+ <div class="aud">
+  <div><h3>Professores particulares</h3><ul><li>Uma aula em grupo que os alunos pedem para repetir</li><li>Conteúdo pronto do A1 ao B2, em sequência</li><li>Turmas pequenas rendem mais: 2 a 4 alunos por guilda</li></ul></div>
+  <div><h3>Escolas de idiomas</h3><ul><li>Um diferencial para atrair e reter alunos</li><li>Prática de fala que complementa o material da escola</li><li>Funciona na TV da sala ou no celular de cada aluno</li></ul></div>
+  <div><h3>Empresas e equipes</h3><ul><li>Treino de fala em grupo para quem usa inglês no trabalho</li><li>Sessões curtas, com começo, meio e fim</li><li>Modo solo para praticar entre os encontros</li></ul></div>
+ </div>
+</div></section>
+
+<section class="alt"><div class="wrap">
+ <div class="head"><div class="kick">Comparação</div><h2>Onde o Voxheim se encaixa.</h2></div>
+ <div class="tbl"><table>
+  <thead><tr><th></th><th>Apps de exercício</th><th>Apps de conversa com IA</th><th>Aula particular</th><th class="vx">Voxheim</th></tr></thead>
+  <tbody>
+   <tr><td>Quanto o aluno fala</td><td>Pouco: muito toque na tela</td><td>Bastante</td><td>Bastante</td><td class="vx">Bastante, em voz alta e em grupo</td></tr>
+   <tr><td>Jogo em grupo</td><td class="n">Não</td><td class="n">Não</td><td class="n">Não</td><td class="vx"><span class="y">Sim</span>, cooperativo, com professor</td></tr>
+   <tr><td>Erros típicos do brasileiro</td><td class="n">Raramente</td><td class="n">Raramente</td><td>Depende do professor</td><td class="vx"><span class="y">No centro do método</span></td></tr>
+   <tr><td>Sequência gramatical</td><td>Leve</td><td>Variável</td><td>Depende do professor</td><td class="vx">Do A1 ao B2, capítulo a capítulo</td></tr>
+   <tr><td>Prova de evolução</td><td>Pontos e sequência de dias</td><td>Relatórios</td><td>Percepção do professor</td><td class="vx">A própria voz, antes e depois</td></tr>
+   <tr><td>Funciona sem internet</td><td>Em parte</td><td class="n">Não</td><td class="n">—</td><td class="vx"><span class="y">Sim</span></td></tr>
+  </tbody></table></div>
+</div></section>
+
+<section id="perguntas"><div class="wrap">
+ <div class="head"><div class="kick">Perguntas</div><h2>Perguntas frequentes</h2></div>
+ <details><summary>Precisa instalar alguma coisa?</summary><p>Não. O Voxheim abre no navegador do celular, do computador ou da TV. Se quiser, dá para instalar como app pelo próprio navegador, sem passar pela loja.</p></details>
+ <details><summary>Precisa de professor?</summary><p>O jogo foi pensado para um professor conduzir uma guilda de 2 a 4 alunos. Também existe o modo solo, com dois companheiros virtuais e reconhecimento de fala, para o aluno praticar sozinho.</p></details>
+ <details><summary>Para qual nível é?</summary><p>Hoje vai do A1 ao B2, em três livros. O aluno pode começar do zero ou entrar direto no livro do nível dele. Os livros C1 e C2 estão em produção.</p></details>
+ <details><summary>Funciona sem internet?</summary><p>Sim. Depois de aberto uma vez, o jogo fica guardado no aparelho, e as vozes de cada capítulo ficam guardadas assim que ele é jogado. Só o reconhecimento de fala depende da internet, e funciona melhor no Chrome.</p></details>
+ <details><summary>Quanto custa?</summary><p>O Voxheim está em fase de piloto com as primeiras turmas. Fale com a gente para conhecer as condições para professores, escolas e empresas.</p></details>
+</div></section>
+
+<section class="final"><div class="wrap">
+ <div class="kick">Experimente</div>
+ <h2>Na próxima aula, em vez de perguntar “alguém quer falar?”, comece uma batalha.</h2>
+ <p class="lead">A demonstração é gratuita e abre direto no navegador.</p>
+ <div class="cta"><a class="btn primary" href="../">Jogar a demonstração</a><a class="btn ghost" href="#para-quem" data-contact>Quero levar para a minha turma</a></div>
+</div></section>
+
+<footer><div class="wrap"><span>Voxheim · Método Fluência Ativa</span><span>Feito no Brasil, para quem quer destravar o inglês.</span></div></footer>
+<script>
+/* contact link: fill in CONTACT to point the "levar para a minha turma" buttons to WhatsApp or e-mail */
+const CONTACT="";
+if(CONTACT) document.querySelectorAll("[data-contact]").forEach(a=>{ a.href=CONTACT; a.target="_blank"; a.rel="noopener"; });
+</script>
+</body>
+</html>
