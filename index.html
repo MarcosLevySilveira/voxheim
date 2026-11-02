@@ -2839,12 +2839,12 @@ function atkElos(A,free,done,defended){
   const bindV=()=>{ const box=$("sh-kit"); const rv=box.querySelector("#el-rev"); if(rv) rv.onclick=()=>{ box.querySelector("#el-ans").hidden=false; rv.hidden=true; speak(c.m[k],false); };
     const mic=box.querySelector("#el-mic"); if(!mic) return; const out=box.querySelector("#el-out"); const yes=$("sh-btns").querySelector(".yes"); if(yes) yes.hidden=SOLO;
     mic.onclick=()=>{ if(stopL){ stopL(); return; } mic.classList.add("on"); mic.querySelector("span").textContent="Ouvindo… fale agora"; out.hidden=true;
-      stopL=listenOnce(r=>{ stopL=null; mic.classList.remove("on"); out.hidden=false;
+      const k0=k; stopL=listenOnce(r=>{ stopL=null; if(over||k!==k0) return; mic.classList.remove("on"); out.hidden=false;
         if(r.err){ out.innerHTML=r.err==="no-speech"?"Não ouvi nada. Toque e fale de novo.":"O reconhecimento falhou. Avaliem vocês."; mic.querySelector("span").textContent="Tentar de novo"; if(r.err!=="no-speech"&&yes) yes.hidden=false; return; }
         const fit=x=>{ const sm=c.m.map(m=>simEn(x,m)); return sm[k]>=.5&&sm[k]>=Math.max(...sm); }; const t=r.alts.find(x=>ELO_RX.test(x)&&fit(x))||r.alts[0]; const okS=ELO_RX.test(t), okC=fit(t); tries++;
-        if(okS&&okC){ out.innerHTML='Ouvi: <i lang="en">“'+esc(t)+'”</i><br><b class="sr-ok">Elo forjado!</b>'; sfx.heal(); setTimeout(()=>{ if(!over) step(true); },1000); return; }
+        if(okS&&okC){ out.innerHTML='Ouvi: <i lang="en">“'+esc(t)+'”</i><br><b class="sr-ok">Elo forjado!</b>'; sfx.heal(); setTimeout(()=>{ if(!over&&k===k0) step(true); },1000); return; }
         sfx.bad(); out.innerHTML='Ouvi: <i lang="en">“'+esc(t)+'”</i><br><b class="sr-no">'+(!okS?"Falta a forma: If I hadn’t…, I wouldn’t have…":"A forma está certa, mas não ligou estes dois elos.")+'</b>'+(tries<3?" Tente de novo.":"");
-        if(tries>=3){ mic.disabled=true; setTimeout(()=>{ if(!over) step(false); },1600); } else mic.querySelector("span").textContent="Tentar de novo ("+(3-tries)+")"; }); }; };
+        if(tries>=3){ mic.disabled=true; setTimeout(()=>{ if(!over&&k===k0) step(false); },1600); } else mic.querySelector("span").textContent="Tentar de novo ("+(3-tries)+")"; }); }; };
   const finish=()=>{ over=true; closeSheet(); const ok=res.filter(Boolean).length;
     if(ok) hitBoss(8*ok,ok===n,false); if(n-ok) hurtTeam(A.dmg*(n-ok));
     if(ok===n) defended(free,"A guilda forjou a corrente inteira: "+c.t+"!"); else setLog("Corrente de Consequências: "+ok+" de "+n+" elos."); done(); };
@@ -2936,12 +2936,12 @@ function atkJornal(A,free,done,defended){
   const bindV=()=>{ const box=$("sh-kit"); const rv=box.querySelector("#nw-rev"); if(rv) rv.onclick=()=>{ box.querySelector("#nw-ans").hidden=false; rv.hidden=true; speak(c.m[k],false); };
     const mic=box.querySelector("#nw-mic"); if(!mic) return; const out=box.querySelector("#nw-out"); const yes=$("sh-btns").querySelector(".yes"); if(yes) yes.hidden=SOLO;
     mic.onclick=()=>{ if(stopL){ stopL(); return; } mic.classList.add("on"); mic.querySelector("span").textContent="No ar… fale agora"; out.hidden=true;
-      stopL=listenOnce(r=>{ stopL=null; mic.classList.remove("on"); out.hidden=false;
+      const k0=k; stopL=listenOnce(r=>{ stopL=null; if(over||k!==k0) return; mic.classList.remove("on"); out.hidden=false;
         if(r.err){ out.innerHTML=r.err==="no-speech"?"Não ouvi nada. Toque e fale de novo.":"O reconhecimento falhou. Avaliem vocês."; mic.querySelector("span").textContent="Tentar de novo"; if(r.err!=="no-speech"&&yes) yes.hidden=false; return; }
         const fit=x=>{ const sm=c.m.map(m=>simEn(x,m)); return sm[k]>=.5&&sm[k]>=Math.max(...sm); }; const t=r.alts.find(x=>PASS_RX.test(x)&&fit(x))||r.alts[0]; const okS=PASS_RX.test(t), okC=fit(t); tries++;
-        if(okS&&okC){ out.innerHTML='No ar: <i lang="en">“'+esc(t)+'”</i><br><b class="sr-ok">Notícia dada!</b>'; sfx.heal(); setTimeout(()=>{ if(!over) step(true); },1000); return; }
+        if(okS&&okC){ out.innerHTML='No ar: <i lang="en">“'+esc(t)+'”</i><br><b class="sr-ok">Notícia dada!</b>'; sfx.heal(); setTimeout(()=>{ if(!over&&k===k0) step(true); },1000); return; }
         sfx.bad(); out.innerHTML='No ar: <i lang="en">“'+esc(t)+'”</i><br><b class="sr-no">'+(!okS?"Ainda está na voz ativa. Use be + particípio: was stolen, has been sold.":"A forma é passiva, mas não é este fato.")+'</b>'+(tries<3?" Tente de novo.":"");
-        if(tries>=3){ mic.disabled=true; setTimeout(()=>{ if(!over) step(false); },1600); } else mic.querySelector("span").textContent="Tentar de novo ("+(3-tries)+")"; }); }; };
+        if(tries>=3){ mic.disabled=true; setTimeout(()=>{ if(!over&&k===k0) step(false); },1600); } else mic.querySelector("span").textContent="Tentar de novo ("+(3-tries)+")"; }); }; };
   const finish=()=>{ over=true; closeSheet(); const ok=res.filter(Boolean).length;
     if(ok) hitBoss(9*ok,ok===n,false); if(n-ok) hurtTeam(A.dmg*(n-ok));
     if(ok===n) defended(free,"Jornal completo! O Arauto perdeu a voz: "+c.t.replace(/^Plantão: /,"")+"."); else setLog("Plantão do Arauto: "+ok+" de "+n+" fatos no ar."); done(); };
@@ -3023,12 +3023,12 @@ function atkBoato(A,free,done,defended){
     setTimeout(()=>speak(q[1],false),350);
     const mic=box.querySelector("#bt-mic"); if(!mic) return; const out=box.querySelector("#bt-out"); const yes=$("sh-btns").querySelector(".yes"); if(yes) yes.hidden=SOLO;
     mic.onclick=()=>{ if(stopL){ stopL(); return; } mic.classList.add("on"); mic.querySelector("span").textContent="Ouvindo… fale agora"; out.hidden=true;
-      stopL=listenOnce(r=>{ stopL=null; mic.classList.remove("on"); out.hidden=false;
+      const k0=k; stopL=listenOnce(r=>{ stopL=null; if(over||k!==k0) return; mic.classList.remove("on"); out.hidden=false;
         if(r.err){ out.innerHTML=r.err==="no-speech"?"Não ouvi nada. Toque e fale de novo.":"O reconhecimento falhou. Avaliem vocês."; mic.querySelector("span").textContent="Tentar de novo"; if(r.err!=="no-speech"&&yes) yes.hidden=false; return; }
         const quoted=x=>simEn(x,q[1])>=.85&&!REP_RX.test(x); const fit=x=>simEn(x,model(q))>=.55; const t=r.alts.find(x=>REP_RX.test(x)&&fit(x))||r.alts[0]; tries++;
-        if(REP_RX.test(t)&&fit(t)){ out.innerHTML='Ouvi: <i lang="en">“'+esc(t)+'”</i><br><b class="sr-ok">'+(FX_?"Boato desmentido!":"Recado dado!")+'</b>'; sfx.heal(); setTimeout(()=>{ if(!over) step(true); },1000); return; }
+        if(REP_RX.test(t)&&fit(t)){ out.innerHTML='Ouvi: <i lang="en">“'+esc(t)+'”</i><br><b class="sr-ok">'+(FX_?"Boato desmentido!":"Recado dado!")+'</b>'; sfx.heal(); setTimeout(()=>{ if(!over&&k===k0) step(true); },1000); return; }
         sfx.bad(); out.innerHTML='Ouvi: <i lang="en">“'+esc(t)+'”</i><br><b class="sr-no">'+(quoted(t)?"Você repetiu a fala com as aspas. Conte: "+esc(q[0])+" said that…":!REP_RX.test(t)?"Comece com said, told ou asked.":simEn(t,model(q))<.35?"Essa não é a fala de "+esc(q[0])+". Ouça de novo.":"Quase. Confira o tempo verbal: is vira was, will vira would, can vira could.")+'</b>'+(tries<3?" Tente de novo.":"");
-        if(tries>=3){ mic.disabled=true; setTimeout(()=>{ if(!over) step(false); },1600); } else mic.querySelector("span").textContent="Tentar de novo ("+(3-tries)+")"; }); }; };
+        if(tries>=3){ mic.disabled=true; setTimeout(()=>{ if(!over&&k===k0) step(false); },1600); } else mic.querySelector("span").textContent="Tentar de novo ("+(3-tries)+")"; }); }; };
   const finish=()=>{ over=true; closeSheet(); const ok=res.filter(Boolean).length;
     if(ok) hitBoss((FX_?10:8)*ok,ok===n,false); if(n-ok) hurtTeam(A.dmg*(n-ok));
     if(ok===n) defended(free,FX_?"Todos os boatos desmentidos! A Rainha perdeu a plateia.":"A mensagem chegou inteira ao fim da fila!"); else setLog(A.n+": "+ok+" de "+n+" certos."); done(); };
@@ -3105,14 +3105,14 @@ function atkRetrato(A,free,done,defended){
   const bindV=()=>{ const box=$("sh-kit"); const c=picks[k]; const rv=box.querySelector("#rt-rev"); if(rv) rv.onclick=()=>{ box.querySelector("#rt-ans").hidden=false; rv.hidden=true; speak(c[2],false); };
     const mic=box.querySelector("#rt-mic"); if(!mic) return; const out=box.querySelector("#rt-out"); const yes=$("sh-btns").querySelector(".yes"); if(yes) yes.hidden=SOLO;
     mic.onclick=()=>{ if(stopL){ stopL(); return; } mic.classList.add("on"); mic.querySelector("span").textContent="Ouvindo… fale agora"; out.hidden=true;
-      stopL=listenOnce(r=>{ stopL=null; mic.classList.remove("on"); out.hidden=false;
+      const k0=k; stopL=listenOnce(r=>{ stopL=null; if(over||k!==k0) return; mic.classList.remove("on"); out.hidden=false;
         if(r.err){ out.innerHTML=r.err==="no-speech"?"Não ouvi nada. Toque e fale de novo.":"O reconhecimento falhou. Avaliem vocês."; mic.querySelector("span").textContent="Tentar de novo"; if(r.err!=="no-speech"&&yes) yes.hidden=false; return; }
         const kw=x=>{ const l=x.toLowerCase(); return [c[0][1],c[1][1]].filter(w=>{ const f=w.toLowerCase().split(" ")[0]; return l.includes(f.slice(0,Math.max(3,f.length-1))); }).length; };
         const fit=x=>{ const sm=all.map(m=>simEn(x,m)), me=simEn(x,c[2]); return kw(x)>=1&&me>=Math.max(...sm)-.05; };
         const t=r.alts.find(x=>UT_RX.test(x)&&fit(x))||r.alts[0]; tries++;
-        if(UT_RX.test(t)&&fit(t)){ out.innerHTML='Ouvi: <i lang="en">“'+esc(t)+'”</i><br><b class="sr-ok">O retrato ganhou cor!</b>'; sfx.heal(); setTimeout(()=>{ if(!over) step(true); },1000); return; }
+        if(UT_RX.test(t)&&fit(t)){ out.innerHTML='Ouvi: <i lang="en">“'+esc(t)+'”</i><br><b class="sr-ok">O retrato ganhou cor!</b>'; sfx.heal(); setTimeout(()=>{ if(!over&&k===k0) step(true); },1000); return; }
         sfx.bad(); out.innerHTML='Ouvi: <i lang="en">“'+esc(t)+'”</i><br><b class="sr-no">'+(!UT_RX.test(t)?(/\buse to\b/i.test(t)?"Na afirmativa é used to, com d: people used to…":"Comece com used to: people used to…"):"Fale dos dois retratos: o de antes e o de agora.")+'</b>'+(tries<3?" Tente de novo.":"");
-        if(tries>=3){ mic.disabled=true; setTimeout(()=>{ if(!over) step(false); },1600); } else mic.querySelector("span").textContent="Tentar de novo ("+(3-tries)+")"; }); }; };
+        if(tries>=3){ mic.disabled=true; setTimeout(()=>{ if(!over&&k===k0) step(false); },1600); } else mic.querySelector("span").textContent="Tentar de novo ("+(3-tries)+")"; }); }; };
   const finish=()=>{ over=true; closeSheet(); const ok=res.filter(Boolean).length;
     if(ok) hitBoss(9*ok,ok===n,false); if(n-ok) hurtTeam(A.dmg*(n-ok));
     if(ok===n) defended(free,"Todos os retratos ganharam cor! O Ancião sorriu."); else setLog("Antes e Agora: "+ok+" de "+n+" retratos."); done(); };
@@ -3189,14 +3189,14 @@ function atkDebate(A,free,done,defended){
   const bindV=()=>{ const box=$("sh-kit"); bindT(); const rv=box.querySelector("#db3-rev"); if(rv) rv.onclick=()=>{ box.querySelector("#db3-ans").hidden=false; rv.hidden=true; speak(d[k+2],false); };
     const mic=box.querySelector("#db3-mic"); if(!mic) return; const out=box.querySelector("#db3-out"); const yes=$("sh-btns").querySelector(".yes"); if(yes) yes.hidden=SOLO;
     mic.onclick=()=>{ if(stopL){ stopL(); return; } mic.classList.add("on"); mic.querySelector("span").textContent="Ouvindo… fale agora"; out.hidden=true;
-      stopL=listenOnce(r=>{ stopL=null; mic.classList.remove("on"); out.hidden=false;
+      const k0=k; stopL=listenOnce(r=>{ stopL=null; if(over||k!==k0) return; mic.classList.remove("on"); out.hidden=false;
         if(r.err){ out.innerHTML=r.err==="no-speech"?"Não ouvi nada. Toque e fale de novo.":"O reconhecimento falhou. Avaliem vocês."; mic.querySelector("span").textContent="Tentar de novo"; if(r.err!=="no-speech"&&yes) yes.hidden=false; return; }
         const score=x=>R().f.filter(f=>f[2].test(x)).length; const t=r.alts.slice().sort((a,b)=>score(b)-score(a))[0]; R().f.forEach(f=>{ if(f[2].test(t)) tools.add(f[0]); });
         const tb=box.querySelector(".tools"); if(tb){ tb.outerHTML=chips(); bindT(); } tries++;
         const need=R().f.find(f=>f[0]===R().need);
-        if(tools.has(R().need)&&normEn(t).length>=6){ out.innerHTML='Ouvi: <i lang="en">“'+esc(t)+'”</i><br><b class="sr-ok">'+tools.size+' de 3 ferramentas!</b>'; sfx.heal(); setTimeout(()=>{ if(!over) step(true); },1200); return; }
+        if(tools.has(R().need)&&normEn(t).length>=6){ out.innerHTML='Ouvi: <i lang="en">“'+esc(t)+'”</i><br><b class="sr-ok">'+tools.size+' de 3 ferramentas!</b>'; sfx.heal(); setTimeout(()=>{ if(!over&&k===k0) step(true); },1200); return; }
         sfx.bad(); out.innerHTML='Ouvi: <i lang="en">“'+esc(t)+'”</i><br><b class="sr-no">'+(normEn(t).length<6?"Fale uma frase mais completa.":"Faltou: "+esc(need[1])+".")+'</b>'+(tries<3?" Tente de novo.":"");
-        if(tries>=3){ mic.disabled=true; setTimeout(()=>{ if(!over) step(false); },1600); } else mic.querySelector("span").textContent="Tentar de novo ("+(3-tries)+")"; }); }; };
+        if(tries>=3){ mic.disabled=true; setTimeout(()=>{ if(!over&&k===k0) step(false); },1600); } else mic.querySelector("span").textContent="Tentar de novo ("+(3-tries)+")"; }); }; };
   const finish=()=>{ over=true; closeSheet(); const sum=res.reduce((a,r)=>a+r.n,0), fails=res.filter(r=>!r.ok).length;
     hitBoss(6+sum*5,sum>=7&&!fails,false); if(fails) hurtTeam(A.dmg*fails);
     if(!fails) defended(free,"Debate completo, com "+sum+" ferramentas! O Grande Eco não conseguiu só repetir."); else setLog("O Debate da Montanha: "+sum+" ferramentas, "+fails+" papel sem resposta."); speak(sum>=7?"Defend your idea!":"Prove me wrong!"); done(); };
