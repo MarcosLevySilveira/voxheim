@@ -402,6 +402,19 @@ header{display:flex;align-items:center;gap:12px;border:1px solid var(--gold);pad
 .rt-die{display:flex;align-items:center;gap:12px;border:1px dashed var(--gold);padding:8px 12px;margin:0 0 8px}.rt-die span{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}.rt-die b{font-family:var(--display);font-weight:400;font-size:24px}
 .tm-msg{border:1px solid #8a2a4a;background:linear-gradient(180deg,#2a0e18,#14080c);padding:8px 12px;margin:4px 0 6px}.tm-msg span{display:block;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ash)}.tm-msg b{font-family:var(--display);font-weight:400;font-size:20px;color:#f6e2a6}
 .tm-scale{display:flex;gap:4px;margin:0 0 8px}.tm-scale span{flex:1;text-align:center;padding:5px 0;border:1px solid var(--line);font-weight:700;color:var(--ash);opacity:.55}.tm-scale span.mid{opacity:.3}.tm-scale span.on{opacity:1;color:#0D0C11;background:var(--c);border-color:var(--c)}
+.pl-open{margin-top:-6px;font-size:13.5px}
+.pl-ov{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:radial-gradient(circle at 50% 30%,#2a1e40,#0D0C11 72%);padding:16px;overflow:auto}
+.pl-card{width:100%;max-width:520px;display:flex;flex-direction:column;gap:10px}
+.pl-top{display:flex;justify-content:space-between;align-items:center}.pl-x{min-width:40px;padding:6px 10px}
+.pl-pips{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.pl-pips span{border:1px solid var(--line);padding:5px 4px;text-align:center;font-size:11px;color:var(--ash);letter-spacing:.06em}.pl-pips b{display:block;font-family:var(--display);font-weight:400;font-size:18px}
+.pl-pips span.now{border-color:var(--gold);color:var(--gold)}.pl-pips span.ok{background:rgba(92,196,180,.15);border-color:#5CC4B4;color:#5CC4B4}
+.pl-card h3{font-size:26px;margin:4px 0 0;font-weight:400}.pl-who{font-size:13px;color:var(--ash);margin:0}
+.pl-sit{font-style:italic;color:var(--ash);margin:0}.pl-q{margin:0;font-weight:700}.pl-pt{font-family:var(--display);font-size:22px;margin:0;color:#f6e2a6}
+.pl-cl{font-size:19px;margin:0}.pl-cl small{color:var(--ash)}.pl-blank{color:var(--gold);letter-spacing:.1em}
+.pl-opts{display:flex;flex-direction:column;gap:6px}.pl-opt{text-align:left;padding:11px 12px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:inherit;font:inherit;font-size:16px;cursor:pointer}
+.pl-opt.ok{border-color:#5CC4B4;background:rgba(92,196,180,.16)}.pl-opt.no{border-color:#C8464F;background:rgba(200,70,79,.16)}
+.pl-act{display:flex;gap:6px;flex-wrap:wrap}.pl-act button{flex:1}.pl-ans{font-size:17px;margin:0;color:#5CC4B4}.pl-fb{margin:0}
+.pl-res{display:flex;flex-direction:column;gap:8px}.pl-world{margin:0;color:var(--gold);font-weight:700}
 .recov{position:fixed;inset:0;z-index:48;display:grid;place-items:center;background:radial-gradient(circle at 50% 30%,rgba(60,40,18,.97),rgba(0,0,0,.99) 72%);padding:16px;overflow:auto}
 .rec-card{width:100%;max-width:420px;background:var(--stone);border:1px solid var(--gold);padding:20px 18px;box-shadow:0 0 60px rgba(201,164,92,.18)}
 .rec-k{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
@@ -585,6 +598,7 @@ details ul{margin:8px 0 0;padding-left:18px;font-size:13.5px;display:flex;flex-d
       <p class="intro" id="phase-desc" style="font-size:12.5px;margin-top:6px"></p>
     </div>
     <button type="button" class="primary" id="to-map">Entrar em Voxheim</button>
+    <button type="button" class="ghost pl-open" id="pl-open">Já fala inglês? Faça o teste de nivelamento</button>
     <details>
       <summary>Como se joga</summary>
       <ul>
@@ -1780,7 +1794,7 @@ function isleIcon(W,open){ const c=open?"#2a1d14":"#3a3646", x=W.x,y=W.y;
     book:'<path d="M-7 -6h6a2 2 0 0 1 1 1v12a2 2 0 0 0-1-1h-6zM7 -6h-6M7 -6v12h-6" stroke="'+c+'" stroke-width="2" fill="none"/>',
     ring:'<ellipse rx="8" ry="5" fill="none" stroke="'+c+'" stroke-width="2.4"/><path d="M-8 0v4M8 0v4M-8 4a8 5 0 0 0 16 0" stroke="'+c+'" stroke-width="2" fill="none"/>'};
   return '<g transform="translate('+x+' '+y+')">'+(P[W.icon]||"")+'</g>'; }
-function worldOpen(W){ return !!W.open || (W.id==="mares"&&!!(progress.bells&&progress.bells.torre)) || !!(W.unlockBell&&progress.bells&&progress.bells[W.unlockBell]) || (UNLOCK&&!!(W.ch||BOOKREG[W.id])); }
+function worldOpen(W){ return !!W.open || (W.id==="mares"&&!!(progress.bells&&progress.bells.torre)) || !!(W.unlockBell&&progress.bells&&progress.bells[W.unlockBell]) || (UNLOCK&&!!(W.ch||BOOKREG[W.id])) || plOpenW(W); }
 function paintAtlas(){
   const svg=$("atlas-art"); const u="at"+(++UID); const bells=Object.keys(progress.bells||{}).length;
   let h='<defs>'+rad(u+"sea","50%","55%","75%",[[0,"#1b3a52"],[.6,"#0f2234"],[1,"#070d16"]])+lin(u+"gd",[0,0],[1,1],GOLD)+
@@ -1806,7 +1820,7 @@ function paintAtlas(){
     if(!op&&W.kind==="book") h+='<g transform="translate('+(W.x+r*.7)+' '+(W.y-r*.55)+')"><circle r="9" fill="#14121c" stroke="#6a6478"/><path d="M-3 0v-2a3 3 0 0 1 6 0v2M-4 0h8v5h-8z" fill="none" stroke="#a69d8e" stroke-width="1.4"/></g>';
     h+='</g>'; });
   // you are here
-  const me=WORLD[0];
+  const me=ROUTE.slice().reverse().map(id=>WORLD.find(w=>w.id===id)).find(worldOpen)||WORLD[0];
   h+='<g class="at-here" transform="translate('+(me.x+30)+' '+(me.y-52)+')"><circle r="16" fill="#f2c46a" opacity=".25"><animate attributeName="r" values="10;20;10" dur="2s" repeatCount="indefinite"/></circle><path d="M0 12 C-9 0 -10 -4 -10 -8 a10 10 0 0 1 20 0 c0 4 -1 8 -10 20z" fill="url(#'+u+'gd)" filter="url(#'+u+'gl)"/><circle cy="-8" r="4" fill="#14121c"/><text x="14" y="-14" class="at-me">Você está aqui</text></g>';
   // compass
   h+='<g transform="translate(36 40)" opacity=".8"><circle r="20" fill="none" stroke="#C9A45C" stroke-width="1"/><path d="M0 -24 L5 0 L0 24 L-5 0Z" fill="#C9A45C"/><path d="M-24 0 L0 -4 L24 0 L0 4Z" fill="#C9A45C" opacity=".6"/><text y="-28" text-anchor="middle" class="at-lv">N</text></g>';
@@ -3844,6 +3858,75 @@ document.querySelectorAll("#modesel button").forEach(b=>b.onclick=()=>{ sfx.pick
 $("camp-open").onclick=()=>{ sfx.pick(); openSlots(); }; paintSlotBar(); tour("setup");
 { const _pr=paintRegion; paintRegion=function(){ _pr.apply(this,arguments); try{ preloadChap(REGIONS[selR].ch); }catch(e){} if(tutSeen().map&&!$("map").hidden&&document.querySelector("#space-detail [data-st]")) tour("region"); }; }
 function show(id){ ["setup","atlas","expedition","map","battle","journey","grimoire"].forEach(s=>$(s).hidden=s!==id); window.scrollTo(0,0); if(TOURS[id]) tour(id); }
+/* ---------- Prova dos Portões: teste de nivelamento (abre o livro do nível de quem já fala inglês) ---------- */
+const PL_GATES=[{n:"Portão do Reino",lvl:"A1–A2",bk:"Livro I"},{n:"Portão das Marés",lvl:"B1",bk:"Livro II"},{n:"Portão da Cordilheira",lvl:"B2",bk:"Livro III"},{n:"Portão dos Espelhos",lvl:"C1",bk:"Livro IV"}];
+function plPool(g){ return (BOOKREG[ROUTE[g]]||[]).filter(R=>R.ch&&R.ch!=="c0"&&R.ch!=="c14"&&CHAPTERS[R.ch]&&CHAPTERS[R.ch].data).flatMap(R=>CHAPTERS[R.ch].data.items||[]).filter(x=>x.en&&x.wrong&&x.cl); }
+function plGap(x){ const cl=x.cl.replace(/\s*\([^)]*\)\s*$/,""), p=cl.split("___"); if(p.length!==2) return null;
+  if(!x.en.startsWith(p[0])||!x.en.endsWith(p[1])||x.en.length<p[0].length+p[1].length+1) return null;
+  const a=x.en.slice(p[0].length,x.en.length-p[1].length).trim(); return a&&a.split(" ").length<=3&&!/[.,!?"]/.test(a)?a:null; }
+function plBuild(g){ const pool=shuffle(plPool(g)), used=new Set(), take=f=>{ const x=pool.find(y=>!used.has(y.id)&&f(y)); if(x) used.add(x.id); return x; };
+  const pick=()=>take(x=>simEn(x.wrong,x.en)>=.5&&normEn(x.wrong).join(" ")!==normEn(x.en).join(" "));
+  const gaps=pool.map(x=>[x,plGap(x)]).filter(z=>z[1]);
+  const Q=[]; let x=pick(); if(x) Q.push({t:"pick",x});
+  const gz=gaps.find(z=>!used.has(z[0].id)); if(gz){ used.add(gz[0].id); const oth=shuffle([...new Set(gaps.map(z=>z[1]).filter(a=>a.toLowerCase()!==gz[1].toLowerCase()))]).slice(0,2); Q.push({t:"gap",x:gz[0],a:gz[1],opts:shuffle([gz[1]].concat(oth))}); }
+  x=take(()=>true); if(x) Q.push({t:"say",x});
+  x=pick()||take(()=>true); if(x) Q.push({t:"pick",x});
+  return Q; }
+function plOpenW(W){ const pl=progress.placed|0; if(!pl) return false; const bi=ROUTE.indexOf(W.id); if(W.kind==="book") return bi>=0&&bi<=pl;
+  if(W.unlockBell){ const b=ROUTE.findIndex(k=>(BOOKREG[k]||[]).some(R=>R.id===W.unlockBell)); return b>=0&&b<pl; } return false; }
+function openPlacement(){ ac();
+  const ov=document.createElement("div"); ov.className="pl-ov"; ov.setAttribute("role","dialog"); ov.setAttribute("aria-modal","true"); ov.setAttribute("aria-label","Prova dos Portões"); document.body.appendChild(ov);
+  const names=SOLO?[(NAMES[0]||"").trim()||"Você"]:[...Array(count).keys()].map(i=>(NAMES[i]||"").trim()||("Herói "+(i+1)));
+  let g=0, Q=plBuild(0), qi=0, hits=0, turn=0, stopL=null, tries=0, revealed=false, passed=0;
+  const close=()=>{ if(stopL){ stopL(); stopL=null; } stopSay(); ov.remove(); };
+  const pips=()=>'<div class="pl-pips">'+PL_GATES.map((G0,i)=>'<span class="'+(i<g?'ok':i===g?'now':'')+'"><b>'+(i+1)+'</b>'+esc(G0.lvl)+'</span>').join("")+'</div>';
+  const head=()=>'<div class="pl-top"><span class="tag">Prova dos Portões</span><button type="button" class="ghost pl-x" aria-label="Fechar o teste">✕</button></div>'+pips();
+  const frame=body=>{ ov.innerHTML='<div class="pl-card">'+head()+body+'</div>'; ov.querySelector(".pl-x").onclick=()=>{ sfx.pick(); close(); }; };
+  const intro=()=>{ frame('<h3 class="display">Já fala um pouco de inglês?</h3><p class="intro">São quatro portões, do básico ao avançado, com 4 desafios cada: escolher a frase certa, completar uma lacuna e falar uma frase em inglês.'+(SOLO?'':' Os heróis se revezam.')+' Acertou 3 de 4, abre o próximo portão. O teste termina no primeiro portão que ficar fechado, e o jogo começa no livro desse nível.</p><p class="intro" style="font-size:12.5px">Leva uns 5 minutos. Não use tradutor: o teste só serve se mostrar o nível de verdade. Os livros anteriores continuam abertos para revisar.</p><button type="button" class="primary" id="pl-go">Começar o teste</button>');
+    ov.querySelector("#pl-go").onclick=()=>{ sfx.card(); ask(); }; };
+  const who=()=>names[turn%names.length];
+  const next=ok=>{ if(stopL){ stopL(); stopL=null; } if(ok) hits++; qi++; turn++; tries=0; revealed=false;
+    if(hits>=3||qi>=Q.length||hits+(Q.length-qi)<3){ gateEnd(hits>=3); return; } ask(); };
+  const fb=(ok,msg)=>{ ok?sfx.heal():sfx.bad(); const f=ov.querySelector("#pl-fb"); f.hidden=false; f.innerHTML=(ok?'<b class="sr-ok">Certo!</b> ':'<b class="sr-no">Não foi dessa vez.</b> ')+(msg||""); ov.querySelectorAll(".pl-opt,.pl-act button,#pl-mic").forEach(b=>b.disabled=true);
+    const nb=ov.querySelector("#pl-next"); nb.hidden=false; nb.onclick=()=>{ sfx.pick(); next(ok); }; nb.focus(); };
+  const ask=()=>{ const q=Q[qi], x=q.x; const top='<p class="pl-who">Desafio '+(qi+1)+' de '+Q.length+' · <b>'+esc(PL_GATES[g].n)+'</b>'+(names.length>1?' · vez de <b>'+esc(who())+'</b>':'')+'</p>';
+    const tail='<p class="pl-fb" id="pl-fb" hidden aria-live="polite"></p><button type="button" class="primary" id="pl-next" hidden>Continuar</button>';
+    if(q.t==="pick"){ const opts=shuffle([[x.en,1],[x.wrong,0]]);
+      frame(top+'<p class="pl-sit" lang="en">'+esc(x.sit||"")+'</p><p class="pl-q">Qual frase está certa?</p><div class="pl-opts">'+opts.map(o=>'<button type="button" class="pl-opt" lang="en" data-ok="'+o[1]+'">'+esc(o[0])+'</button>').join("")+'</div>'+tail);
+      ov.querySelectorAll(".pl-opt").forEach(b=>b.onclick=()=>{ const ok=b.dataset.ok==="1"; b.classList.add(ok?"ok":"no"); if(!ok) ov.querySelector('.pl-opt[data-ok="1"]').classList.add("ok"); speak(x.en,false); fb(ok,ok?"":'A certa é <i lang="en">“'+esc(x.en)+'”</i>.'); });
+    } else if(q.t==="gap"){ const hint=(x.cl.match(/\(([^)]*)\)\s*$/)||[])[1];
+      frame(top+'<p class="pl-q">Complete a frase.</p><p class="pl-cl" lang="en">'+esc(x.cl.replace(/\s*\([^)]*\)\s*$/,"")).replace("___",'<span class="pl-blank">_____</span>')+(hint?' <small>('+esc(hint)+')</small>':'')+'</p><div class="pl-opts">'+q.opts.map(o=>'<button type="button" class="pl-opt" lang="en" data-ok="'+(o===q.a?1:0)+'">'+esc(o)+'</button>').join("")+'</div>'+tail);
+      ov.querySelectorAll(".pl-opt").forEach(b=>b.onclick=()=>{ const ok=b.dataset.ok==="1"; b.classList.add(ok?"ok":"no"); if(!ok) ov.querySelector('.pl-opt[data-ok="1"]').classList.add("ok"); speak(x.en,false); fb(ok,'<i lang="en">“'+esc(x.en)+'”</i>'); });
+    } else {
+      const useSR=!!SR, selfJudge=!(SOLO&&useSR);
+      frame(top+'<p class="pl-q">Diga em inglês:</p><p class="pl-pt">'+esc(x.pt)+'</p>'+
+        (useSR?'<div class="pp-mic"><button type="button" class="sr-btn" id="pl-mic"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Falar</span></button><p class="sr-out" id="pl-out" aria-live="polite" hidden></p></div>':'')+
+        '<div class="pl-act">'+(selfJudge?'<button type="button" class="ghost" id="pl-rev">'+(SOLO?'Já falei: ver a resposta':'Ver a resposta (o professor confere)')+'</button>':'<button type="button" class="ghost" id="pl-skip">Não sei</button>')+'</div><p class="pl-ans" id="pl-ans" lang="en" hidden>'+esc(x.en)+'</p>'+
+        '<div class="pl-act" id="pl-judge" hidden><button type="button" class="ghost" data-j="1">'+(SOLO?'Eu disse certo':'Disse certo')+'</button><button type="button" class="ghost" data-j="0">'+(SOLO?'Não consegui':'Errou ou travou')+'</button></div>'+tail);
+      const rev=ov.querySelector("#pl-rev"); if(rev) rev.onclick=()=>{ revealed=true; ov.querySelector("#pl-ans").hidden=false; rev.hidden=true; ov.querySelector("#pl-judge").hidden=false; speak(x.en,false); };
+      ov.querySelectorAll("#pl-judge button").forEach(b=>b.onclick=()=>{ ov.querySelector("#pl-judge").hidden=true; fb(b.dataset.j==="1"); });
+      const sk=ov.querySelector("#pl-skip"); if(sk) sk.onclick=()=>{ ov.querySelector("#pl-ans").hidden=false; speak(x.en,false); fb(false,""); };
+      const mic=ov.querySelector("#pl-mic"); if(mic){ const out=ov.querySelector("#pl-out");
+        mic.onclick=()=>{ if(stopL){ stopL(); return; } mic.classList.add("on"); mic.querySelector("span").textContent="Ouvindo… fale agora"; out.hidden=true; const q0=qi;
+          stopL=listenOnce(r=>{ stopL=null; if(qi!==q0||!ov.isConnected) return; mic.classList.remove("on"); out.hidden=false;
+            if(r.err){ out.innerHTML=r.err==="no-speech"?"Não ouvi nada. Toque e fale de novo.":"O reconhecimento falhou."+(SOLO?" Use “Não sei” ou tente de novo.":" O professor confere."); mic.querySelector("span").textContent="Tentar de novo"; if(r.err!=="no-speech"&&rev===null&&SOLO){ /* solo sem voz: libera a autoavaliação */ ov.querySelector("#pl-ans").hidden=false; ov.querySelector("#pl-judge").hidden=false; } return; }
+            const best=r.alts.reduce((m,t)=>Math.max(m,simEn(t,x.en)),0), t=r.alts.slice().sort((a,b)=>simEn(b,x.en)-simEn(a,x.en))[0]; tries++;
+            if(best>=.8){ out.innerHTML='Ouvi: <i lang="en">“'+esc(t)+'”</i>'; ov.querySelector("#pl-ans").hidden=false; fb(true,""); return; }
+            out.innerHTML='Ouvi: <i lang="en">“'+esc(t)+'”</i>'+(tries<2?'<br>Ainda não. Tente de novo.':'');
+            if(tries>=2){ ov.querySelector("#pl-ans").hidden=false; speak(x.en,false); fb(false,""); } else { mic.querySelector("span").textContent="Tentar de novo (1)"; sfx.bad(); } }); }; }
+    } };
+  const gateEnd=ok=>{ if(ok) passed=g+1; if(ok&&g<PL_GATES.length-1){ sfx.heal(); const G0=PL_GATES[g];
+      frame('<div class="pl-res"><span class="tag">Portão aberto</span><h3 class="display">'+esc(G0.n)+' · '+esc(G0.lvl)+'</h3><p class="intro">'+hits+' de '+Q.length+'. Vamos ao próximo nível: '+esc(PL_GATES[g+1].lvl)+'.</p><button type="button" class="primary" id="pl-on">Próximo portão</button></div>');
+      ov.querySelector("#pl-on").onclick=()=>{ sfx.card(); g++; Q=plBuild(g); qi=0; hits=0; ask(); }; return; }
+    result(); };
+  const result=()=>{ const start=Math.min(passed,ROUTE.length-2), W=WORLD.find(w=>w.id===ROUTE[start]);
+    progress.placed=Math.max(progress.placed|0,start); saveProgress(); atSel=ROUTE[start]; sfx.card();
+    const msg=passed===0?"Comece pelo começo: o Livro I vai firmar a base, e ela vai crescer rápido.":passed>=PL_GATES.length?(SOLO?"Você passou":"Vocês passaram")+" por todos os portões. O Livro IV, nível C1, é o mais alto aberto hoje.":"Os livros anteriores ficam abertos para revisar o que precisar.";
+    frame('<div class="pl-res"><span class="tag">Resultado</span><h3 class="display">Comecem no '+esc(PL_GATES[start].bk)+'</h3><p class="pl-world">'+esc(W.n)+' · nível '+esc(W.lvl)+'</p><p class="intro">'+esc(msg)+'</p><button type="button" class="primary" id="pl-enter">Entrar em Voxheim</button></div>');
+    ov.querySelector("#pl-enter").onclick=()=>{ close(); $("to-map").click(); }; };
+  intro();
+}
+$("pl-open").onclick=()=>{ sfx.pick(); openPlacement(); };
 $("to-map").onclick=()=>{ ac(); if(!sagaSeen()) return openSaga(()=>openAtlas()); sfx.card(); openAtlas(); };
 $("ex-quit").onclick=()=>{ EXP=null; G=null; sfx.pick(); if(CH().isle) openAtlas(); else { paintMap(); show("map"); } };
 $("to-atlas").onclick=()=>{ sfx.card(); openAtlas(); };
