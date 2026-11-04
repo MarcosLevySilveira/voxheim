@@ -1713,8 +1713,10 @@ const TOURS={
   {el:"#b-hp",t:"Vida do chefão",d:"Cada frase dita certa tira vida dele. Zerou, a guilda vence."},
   {el:"#cor",t:"Coragem da equipe",d:"Quando alguém trava, a equipe perde Coragem. Se chegar a zero, o Silêncio vence esta batalha."},
   {el:"#intent",t:"O próximo golpe",d:"Aqui o chefão avisa qual ataque vem e daqui a quantas jogadas. Preparem-se para se defender."},
-  {el:"#party",t:"A guilda",d:"O herói destacado é quem joga agora. Depois de cada ação, a vez passa para o próximo."},
-  {el:"#actions .acard",t:"O primeiro ataque",d:"Toque em Golpe. Aparece uma carta: quem está na vez fala em inglês, em voz alta, e o golpe acontece.",tap:true}],
+  {el:"#party",t:"A guilda",d:"O herói destacado é quem joga agora. Depois de cada ação, a vez passa para o próximo."}],
+ turn:[
+  {el:"#turn-h",t:()=>"Sua vez de atacar"+(G&&G.heroes[G.cur]&&!SOLO?", "+G.heroes[G.cur].name:"")+"!",d:()=>"Quando aparece “Vez de …”, "+(SOLO?"é a sua vez":"é a vez desse herói")+" de atacar o chefão. Sem pressa: o chefão só ataca depois de algumas jogadas, e o aviso dele fica lá em cima."},
+  {el:"#actions .acard",t:"Escolha o ataque",d:"Golpe é uma frase curta. Golpe Pesado é uma fala mais longa, com mais dano. Para começar, toque em Golpe: aparece uma carta, "+"quem está na vez fala em inglês, em voz alta, e o golpe acontece.",tap:true}],
  card:[
   {el:"#sh-task",t:"A missão da carta",d:"Aqui está o que falar ou fazer. Falem em voz alta, para a guilda ouvir."},
   {el:"#sh-kit",t:"Ajuda e áudio",d:"Aqui ficam o áudio, as palavras-chave e as dicas. Algumas ajudas custam Foco. Acertar sem ajuda vale golpe crítico."},
@@ -1736,9 +1738,9 @@ const tutBlocked=()=>!!document.querySelector(".cine,.recov,.bellfx,.tut")||!$("
 let tutBusy=false, tutCur=null, tutClose=null;
 function tour(name,ctx){
   const S=tutSeen(); if(S.off||S[name]) return;
-  let tries=0; const go=()=>{ if(tutSeen()[name]) return; if(tutBusy){ if(++tries<80) setTimeout(go,400); return; }
-    if(tutBlocked()||(ctx&&ctx.sheet&&$("sheet").hidden)){ if(++tries<40) setTimeout(go,500); return; }
-    if(ctx&&!ctx.sheet&&!$("sheet").hidden){ if(++tries<40) setTimeout(go,500); return; }
+  let tries=0; const go=()=>{ if(tutSeen()[name]) return; if(tutBusy){ if(++tries<900) setTimeout(go,400); return; }
+    if(tutBlocked()||(ctx&&ctx.sheet&&$("sheet").hidden)||(ctx&&ctx.when&&!ctx.when())){ if(++tries<720) setTimeout(go,500); return; }
+    if(ctx&&!ctx.sheet&&!$("sheet").hidden){ if(++tries<720) setTimeout(go,500); return; }
     runTour(name); };
   setTimeout(go,ctx&&ctx.sheet?500:450);
 }
@@ -1757,7 +1759,7 @@ function runTour(name){
     const th=tip.offsetHeight, below=top+h+12, above=top-12-th;
     tip.style.top=(below+th<vh-8?below:above>8?above:Math.max(8,vh-th-8))+"px"; };
   const show=()=>{ const s=steps[i]; s.node.scrollIntoView({block:"center",behavior:"instant"});
-    o.querySelector(".tut-k").textContent="Tutorial · "+(i+1)+" de "+steps.length; o.querySelector(".tut-t").textContent=s.t; o.querySelector(".tut-d").textContent=s.d;
+    o.querySelector(".tut-k").textContent="Tutorial · "+(i+1)+" de "+steps.length; o.querySelector(".tut-t").textContent=typeof s.t==="function"?s.t():s.t; o.querySelector(".tut-d").textContent=typeof s.d==="function"?s.d():s.d;
     o.querySelector(".tut-next").textContent=i===steps.length-1?"Entendi":"Próximo";
     requestAnimationFrame(()=>requestAnimationFrame(place)); setTimeout(place,120); o.querySelector(".tut-next").focus(); };
   const close=()=>{ o.remove(); tutBusy=false; tutCur=null; tutClose=null; removeEventListener("resize",place); }; tutClose=close;
@@ -4822,7 +4824,7 @@ function startBattle(bi){
   G.cur=pickNext(-1); G.solo=SOLO; G.comp=SOLO?COMPANIONS.map(c=>Object.assign({},c)):[]; G.compI=0; G.sess=Date.now(); applyExpedition(); G.snap0={}; G.heroes.forEach(h=>{ G.snap0[h.key]=journeyStats(h.key); });
   $("b-act").textContent=B.act+" · "+CH().short; $("b-name").textContent=B.name;
   $("b-art").innerHTML=B.art(); $("b-wrap").classList.remove("dead");
-  show("battle"); paint(true);
+  show("battle"); paint(true); tour("turn",{when:()=>!$("battle").hidden&&!!G&&!G.over&&!!document.querySelector("#actions .acard:not([disabled])")});
   setLog(B.name+": “"+B.intro+"”");
   cinematic(B);
   if(B.sphinx) sphStart();
