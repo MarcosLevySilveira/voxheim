@@ -424,6 +424,11 @@ header{display:flex;align-items:center;gap:12px;border:1px solid var(--gold);pad
 .pt-ben{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 6px}.pt-ben span{border:1px solid var(--gold);padding:4px 10px;font-weight:700;color:#f6e2a6}
 .cb-ladder{border:1px dashed var(--line);padding:7px 10px;margin:0 0 6px;display:grid;gap:2px}.cb-ladder span{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}.cb-ladder i{font-size:14px;color:var(--ash);margin-bottom:4px}
 .gr-plain small{display:block;font-size:12px;color:var(--ash);margin-top:2px}
+.medal.dim{opacity:.4;filter:grayscale(.6)}
+.tr-row{margin-top:10px;border-top:1px solid var(--line);padding-top:10px}.tr-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.tr-chip{display:flex;align-items:center;gap:6px;border:1px solid var(--line);padding:4px 8px 4px 5px}.tr-chip b{font-size:13px}.tr-chip small{font-size:11px;color:var(--ash)}
+.tr-panel{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);padding:10px 12px}.tr-now{display:flex;gap:10px;align-items:center}.tr-now b{display:block;font-size:15px}.tr-now small{font-size:12.5px;color:var(--ash)}
+.tr-book>span{font-size:12px;font-weight:700;color:var(--ash)}.tr-plat{color:#9ff0ff}.tr-shelf{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.tr-shelf i{display:flex;flex-direction:column;align-items:center;font-style:normal;width:36px}.tr-shelf small{font-size:10px;color:var(--ash)}
+.tr-up{display:flex;gap:10px;align-items:center;border:1px solid var(--gold);background:rgba(201,164,92,.08);padding:8px 10px;margin:0 0 8px}.tr-up b{display:block;font-family:var(--display);font-weight:400;font-size:19px}
 .recov{position:fixed;inset:0;z-index:48;display:grid;place-items:center;background:radial-gradient(circle at 50% 30%,rgba(60,40,18,.97),rgba(0,0,0,.99) 72%);padding:16px;overflow:auto}
 .rec-card{width:100%;max-width:420px;background:var(--stone);border:1px solid var(--gold);padding:20px 18px;box-shadow:0 0 60px rgba(201,164,92,.18)}
 .rec-k{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
@@ -690,6 +695,7 @@ details ul{margin:8px 0 0;padding-left:18px;font-size:13.5px;display:flex;flex-d
     <div class="jwho" id="j-chaps" role="group" aria-label="Escolha o capítulo"></div>
     <div class="jwho" id="j-who" role="group" aria-label="Escolha o aluno"></div>
     <div class="jtiles" id="j-tiles"></div>
+    <div class="tr-panel" id="j-trophy"></div>
     <div><div class="label" style="margin-bottom:6px">Evolução do índice de aprendizado</div><div id="j-chart"></div></div>
     <p class="intro" style="font-size:12.5px" id="j-note">O índice é a média de fixação de tudo o que o capítulo ensina. Cada acerto fixa a palavra, e acertar em dias diferentes fixa mais. Palavra sem prática por mais de dois dias perde fixação aos poucos: jogar de novo é o que mantém o que foi aprendido.</p>
   </div>
@@ -2730,7 +2736,7 @@ function atkEspelho(A,free,done,defended){
   const draw=()=>{ const s=$("mir-svg-box"); if(s) s.innerHTML=mirSVG(mC,uC,dir); };
   const finish=()=>{ if(over) return; over=true; T.speaks++; if(stopR){ try{ stopR(); }catch(e){} }
     if(!best){ T.fails++; hurtTeam(A.dmg); setLog("O espelho ficou vazio: −"+A.dmg+" de Coragem."); done(); return; }
-    const dmg=Math.round(6+12*best.score); if(best.dirOk) defended([ti],T.name+" espelhou a melodia: "+best.pct+"% parecida."); else setLog(T.name+" gravou, mas o fim "+DIRN[best.dir].split(" ")[0]+". O certo era "+(dir==="up"?"subir":"descer")+".");
+    const dmg=Math.round(6+12*best.score); if(best.dirOk) trMir(T); if(best.dirOk) defended([ti],T.name+" espelhou a melodia: "+best.pct+"% parecida."); else setLog(T.name+" gravou, mas o fim "+DIRN[best.dir].split(" ")[0]+". O certo era "+(dir==="up"?"subir":"descer")+".");
     hitBoss(dmg,best.score>.8,false); if(!best.dirOk&&best.score<.35){ T.fails++; hurtTeam(Math.round(A.dmg/2)); } done(); };
   const kit='<div class="mir"><div id="mir-svg-box">'+mirSVG(null,null,dir)+'</div><div class="mir-leg"><span class="m">Modelo</span><span class="u">Você</span><span class="e">barras: a força de cada sílaba</span></div>'+
     '<div class="pp-row">'+pPlay(en,"Modelo")+pPlay(en,"Devagar",true)+(canRec?'<button type="button" class="pp-btn mir-rec" id="mir-rec"><i></i><span>Gravar minha voz</span></button><button type="button" class="pp-btn" id="mir-both" hidden>'+playSvg()+'<span>As duas</span></button>':'')+'</div>'+
@@ -4363,7 +4369,7 @@ if(SOLO) count=1;
 paintSetup(); paintPhase(); paintChap(); paintMode();
 document.querySelectorAll("#modesel button").forEach(b=>b.onclick=()=>{ sfx.pick(); setMode(b.dataset.m==="solo"); });
 $("camp-open").onclick=()=>{ sfx.pick(); openSlots(); }; paintSlotBar(); tour("setup");
-{ const _pr=paintRegion; paintRegion=function(){ _pr.apply(this,arguments); try{ preloadChap(REGIONS[selR].ch); }catch(e){} if(tutSeen().map&&!$("map").hidden&&document.querySelector("#space-detail [data-st]")) tour("region"); }; }
+{ const _pr=paintRegion; paintRegion=function(){ _pr.apply(this,arguments); try{ const R=REGIONS[selR], box=$("space-detail"); if(R&&R.ch&&box&&!R.soon){ const h=trRegionHTML(R.ch); if(h) box.insertAdjacentHTML("beforeend",h); } }catch(e){} try{ preloadChap(REGIONS[selR].ch); }catch(e){} if(tutSeen().map&&!$("map").hidden&&document.querySelector("#space-detail [data-st]")) tour("region"); }; }
 function show(id){ ["setup","atlas","expedition","map","battle","journey","grimoire"].forEach(s=>$(s).hidden=s!==id); window.scrollTo(0,0); if(TOURS[id]) tour(id); }
 /* ---------- Prova dos Portões: teste de nivelamento (abre o livro do nível de quem já fala inglês) ---------- */
 const PL_GATES=[{n:"Portão do Reino",lvl:"A1–A2",bk:"Livro I"},{n:"Portão das Marés",lvl:"B1",bk:"Livro II"},{n:"Portão da Cordilheira",lvl:"B2",bk:"Livro III"},{n:"Portão dos Espelhos",lvl:"C1",bk:"Livro IV"}];
@@ -4616,6 +4622,52 @@ const BOOKREG={reino:REGIONS,mares:[
  {id:"tribuna",n:"Tribuna do Discurso",lvl:"C2",soon:"Falar em público: abrir, prender a atenção e fechar",lm:"temple"},
  {id:"sutileza",n:"Salão das Sutilezas",lvl:"C2",soon:"Sutileza cultural: o que se diz, o que se insinua e o que não se diz",lm:"glass"},
  {id:"voz",n:"O Coração de Lyra",lvl:"C2",soon:"A sua voz: o último chefão fala com a voz do seu primeiro dia",lm:"skyisle"}]};
+/* ---------- Troféus por capítulo: bronze, prata, ouro e platina, para cada aluno ---------- */
+const TR_N=["","Bronze","Prata","Ouro","Platina"], TR_C=["#4a4558","#c8834f","#cfd6e2","#e8c060","#9ff0ff"];
+const trDay=t=>{ const d=new Date(t||Date.now()); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); };
+function trStore(){ if(!progress.tr) progress.tr={}; return progress.tr; }
+function trHero(key){ const T=trStore(); return T[key]||(T[key]={best:{},mir:{},w:{}}); }
+/* vitórias antigas da Crônica contam para a platina (dias diferentes contra o chefe final) */
+function trBackfill(){ const T=trStore(); if(T._bf) return; T._bf=1;
+  (progress.chron||[]).forEach(E=>{ if(!E.won||!E.bossId||E.mega) return; (E.heroes||[]).forEach(n=>{ const H=trHero(hkey(n)), L=H.w[E.bossId]||(H.w[E.bossId]=[]), d=trDay(E.t); if(!L.includes(d)) L.push(d); }); }); }
+function trChapters(){ const out=[]; ROUTE.forEach(bk=>(BOOKREG[bk]||[]).forEach(R=>{ if(R.ch&&CHAPTERS[R.ch]&&CHAPTERS[R.ch].data) out.push({ck:R.ch,bk,R}); })); return out; }
+function trInfo(key,ck){ const C=CHAPTERS[ck]; if(!C||!C.data||!C.bosses) return {r:0};
+  const items=C.data.items||[], n=items.length, M=MST[key]||{}, H=trHero(key); let seen=0, learned=0, fixed=0;
+  items.forEach(x=>{ const r=M[x.id]; if(!r) return; seen++; const s=statusOf(r); if(s==="aprendida"||s==="fixada") learned++; if(s==="fixada") fixed++; });
+  const allCleared=C.bosses.every(B=>progress.cleared[B.id]), half=Math.ceil(n/2);
+  const needMir=C.bosses.some(B=>(B.pattern||[]).includes("espelho")), mir=!needMir||!!H.mir[ck];
+  const fin=C.bosses[C.bosses.length-1], days=(H.w[fin.id]||[]).length;
+  const ok=[seen>0&&allCleared, learned>=half, learned>=n&&fixed>=half&&mir, fixed>=n&&days>=2];
+  let r=0; while(r<4&&ok[r]) r++;
+  const need=r===0?(seen?"Vencer os 3 chefões do capítulo":"Jogar o capítulo"):r===1?"Aprender "+(half-learned)+" frase"+(half-learned>1?"s":"")+" a mais (lembrar sem ver o modelo)":
+    r===2?[learned<n?"aprender mais "+(n-learned):null,fixed<half?"fixar mais "+(half-fixed):null,!mir?"acertar a melodia no Espelho":null].filter(Boolean).join(", "):
+    r===3?[fixed<n?"fixar mais "+(n-fixed)+" (praticando em dias diferentes)":null,days<2?"vencer "+fin.name+" de novo em outro dia":null].filter(Boolean).join(", "):"";
+  return {r,best:Math.max(r,H.best[ck]||0),need,n,learned,fixed};
+}
+/* guarda o melhor troféu já conquistado; devolve quem subiu */
+function trUpdate(keys,cks){ trBackfill(); const ups=[];
+  keys.forEach(k=>cks.forEach(ck=>{ const I=trInfo(k,ck), H=trHero(k), b=H.best[ck]||0; if(I.r>b){ H.best[ck]=I.r; ups.push({k,ck,r:I.r}); } }));
+  if(ups.length) saveProgress(); return ups; }
+function trKeysOf(ck){ const items=(CHAPTERS[ck]&&CHAPTERS[ck].data&&CHAPTERS[ck].data.items)||[]; return Object.keys(MST).filter(k=>items.some(x=>MST[k][x.id])); }
+function medal(r,dim,sz){ sz=sz||26; const c=TR_C[r]; return '<svg class="medal'+(dim?' dim':'')+'" width="'+sz+'" height="'+sz+'" viewBox="0 0 32 32" aria-hidden="true">'+(r?'<path d="M10 2h5l-3 9h-5zM22 2h-5l3 9h5z" fill="'+(r===4?"#5a8ab8":r===3?"#C8464F":"#4a6a9a")+'"/>':'')+'<circle cx="16" cy="20" r="'+(r?10:9)+'" fill="'+(r?c:"none")+'" stroke="'+(r?"#0D0C11":c)+'" stroke-width="'+(r?1.5:2)+'"'+(r?'':' stroke-dasharray="3 3"')+'/>'+(r===4?'<path d="M16 13l2 4.4 4.7.5-3.5 3.2 1 4.6-4.2-2.4-4.2 2.4 1-4.6-3.5-3.2 4.7-.5z" fill="#fff" opacity=".85"/>':r?'<text x="16" y="24.5" text-anchor="middle" font-size="11" font-weight="700" fill="#0D0C11">'+["","B","P","O"][r]+'</text>':'')+'</svg>'; }
+function trChip(k,ck){ const I=trInfo(k,ck), dim=I.best>I.r; const r=I.best;
+  return '<span class="tr-chip" title="'+esc(displayName(k)+": "+(r?TR_N[r]:"sem troféu")+(dim?" (sem brilho: revisite para polir)":"")+(I.need?" · próximo: "+I.need:""))+'">'+medal(r,dim,22)+'<b>'+esc(displayName(k))+'</b><small>'+(r?TR_N[r]:"—")+(dim?" · sem brilho":"")+'</small></span>'; }
+/* na região do mapa */
+function trRegionHTML(ck){ const keys=trKeysOf(ck); if(!keys.length) return ""; trUpdate(keys,[ck]);
+  return '<div class="tr-row"><div class="label">Troféus do capítulo</div><div class="tr-chips">'+keys.map(k=>trChip(k,ck)).join("")+'</div></div>'; }
+/* na Jornada: a estante do aluno */
+function trShelfHTML(k){ const all=trChapters(); trUpdate([k],all.map(x=>x.ck)); const cur=trInfo(k,chapKey);
+  let h='<div class="label">Troféus</div>';
+  if(CHAPTERS[chapKey]&&CHAPTERS[chapKey].data) h+='<div class="tr-now">'+medal(cur.best,cur.best>cur.r,40)+'<div><b>'+esc(CH().short)+': '+(cur.best?TR_N[cur.best]:"ainda sem troféu")+(cur.best>cur.r?' · sem brilho':'')+'</b><small>'+(cur.r>=4?"Platinado! Tudo aprendido, tudo fixado, e o chefão final vencido em dias diferentes.":"Para "+TR_N[Math.min(4,cur.r+1)]+": "+esc(cur.need)+".")+(cur.best>cur.r?" As frases perderam fixação: jogue de novo para polir o troféu.":"")+'</small></div></div>';
+  ROUTE.forEach(bk=>{ const L=all.filter(x=>x.bk===bk); if(!L.length) return; const plat=L.length===7&&L.every(x=>trInfo(k,x.ck).best>=4);
+    h+='<div class="tr-book"><span>'+esc(BOOKNAME[bk]||bk)+(plat?' · <b class="tr-plat">Platina do livro</b>':'')+'</span><div class="tr-shelf">'+L.map(x=>{ const I=trInfo(k,x.ck); return '<i title="'+esc(CHAPTERS[x.ck].short+" · "+x.R.n+": "+(I.best?TR_N[I.best]:"sem troféu"))+'">'+medal(I.best,I.best>I.r,26)+'<small>'+esc(x.ck.replace("c",""))+'</small></i>'; }).join("")+'</div></div>'; });
+  return h+'<p class="intro" style="font-size:12px;margin:0">Bronze: venceu os chefões. Prata: aprendeu metade das frases. Ouro: aprendeu todas, fixou metade e acertou a melodia no Espelho. Platina: fixou todas e venceu o chefão final de novo em outro dia.</p>'; }
+/* no fim da batalha: quem subiu de troféu */
+function trUpHTML(){ if(!G||G.mega||!CH().data||!CH().bosses) return ""; const keys=G.heroes.map(h=>h.key); const ups=trUpdate(keys,[chapKey]); if(!ups.length) return "";
+  setTimeout(()=>{ try{ burst(40,TR_C[Math.max(...ups.map(u=>u.r))]); }catch(e){} },400);
+  return '<div class="tr-up">'+ups.map(u=>medal(u.r,false,44)+'<div><span class="label">Troféu novo · '+esc(CH().short)+'</span><b>'+esc(displayName(u.k))+' conquistou '+TR_N[u.r]+'!</b></div>').join('</div><div class="tr-up">')+'</div>'; }
+function trWin(){ if(!G||G.mega) return; const d=trDay(); G.heroes.forEach(h=>{ const H=trHero(h.key), L=H.w[G.B.id]||(H.w[G.B.id]=[]); if(!L.includes(d)) L.push(d); if(L.length>6) L.shift(); }); saveProgress(); }
+function trMir(h){ if(!h||!h.key||!CH().data) return; trHero(h.key).mir[chapKey]=1; saveProgress(); }
 const BOOKNAME={reino:"O Reino de Voxheim",mares:"O Arquipélago das Marés",cordilheira:"A Cordilheira das Vozes Partidas",espelhos:"A Cidade dos Mil Espelhos",ceu:"O Céu de Lyra"};
 let CURBOOK="reino";
 function setBook(b){ if(!BOOKREG[b]) return; CURBOOK=b; REGIONS=BOOKREG[b]; selR=null; }
@@ -5474,6 +5526,7 @@ function chartSVG(pts){
     '<text x="'+x0+'" y="'+(H-8)+'" font-size="13" fill="#A69D8E">1ª batalha</text><text x="'+x1+'" y="'+(H-8)+'" font-size="13" fill="#A69D8E" text-anchor="end">'+n+'ª batalha</text></svg>';
 }
 function paintJourney(){
+  try{ $("j-trophy").innerHTML=trShelfHTML(jKey); }catch(e){ $("j-trophy").innerHTML=""; }
   const keys=journeyKeys(), k=jKey, M=MST[k]||{}, s=journeyStats(k), H=(HIST[hk(k)]&&HIST[hk(k)].pts)||[];
   $("j-who").innerHTML=keys.map(x=>'<button type="button" data-k="'+esc(x)+'" aria-pressed="'+(x===k)+'">'+esc(displayName(x))+'</button>').join("");
   $("j-who").querySelectorAll("button").forEach(b=>b.onclick=()=>{ jKey=b.dataset.k; sfx.pick(); paintJourney(); });
@@ -5500,17 +5553,17 @@ function victory(){
   $("b-wrap").classList.add("dead"); burst(70,G.B.col); setTimeout(()=>burst(50,"#C9A45C"),300); sfx.win();
   if(G.mega){ setTimeout(()=>speak("You are not who you were."),500); return megaVictory(); }
   setTimeout(()=>speak(DEFEAT_LINE),500); progress.wins=(progress.wins||0)+1;
-  progress.cleared[G.B.id]=true; delete progress.weak[G.B.id]; saveProgress(); snapshotBattle(); addChronicle(true);
+  progress.cleared[G.B.id]=true; delete progress.weak[G.B.id]; saveProgress(); snapshotBattle(); addChronicle(true); trWin();
   const last=G.bi===BOSSES.length-1;
   setTimeout(()=>openSheet({chip:"Vitória",color:"#5CC4B4",who:G.B.act,art:bossArt(true),task:G.B.name+" foi derrotado!",hint:CH().isle?(last?"O "+CH().label.split(" · ")[0]+" é de vocês! A ilha brilha no Atlas.":"O próximo guardião da ilha espera."):chapKey==="c0"?"As primeiras palavras são de vocês. O Capítulo 1 espera a turma.":last?"O último guardião da região caiu. Ouçam: o sino vai tocar.":"O caminho para o próximo ato está aberto.",
-    kitHTML:'<div class="label">Experiência ganha</div>'+xpHTML()+learnHTML()+'<div class="label" style="margin-top:6px">Prêmios da batalha</div>'+awardsHTML(),bindKit:bindLearn,
+    kitHTML:trUpHTML()+'<div class="label">Experiência ganha</div>'+xpHTML()+learnHTML()+'<div class="label" style="margin-top:6px">Prêmios da batalha</div>'+awardsHTML(),bindKit:bindLearn,
     buttons:[{label:CH().isle?"Voltar ao Atlas":"Voltar ao mapa do reino",cls:"go",full:true,fn:backToMap}]}),1500);
 }
 function defeat(){
   if(G.mega){ sfx.lose(); return megaDefeat(); }
   sfx.lose(); progress.weak[G.B.id]=true; saveProgress(); snapshotBattle(); addChronicle(false);
   setTimeout(()=>openSheet({chip:"A equipe recuou",color:"#C8464F",who:G.B.act,art:bossArt(),task:"A Coragem acabou. Desta vez, "+G.B.name+" venceu.",hint:"Vocês já conhecem os golpes dele. Na próxima tentativa, o chefão volta com 25% menos vida.",
-    kitHTML:'<div class="label">Experiência ganha</div>'+xpHTML()+learnHTML()+'<div class="label" style="margin-top:6px">Destaques</div>'+awardsHTML(),bindKit:bindLearn,
+    kitHTML:trUpHTML()+'<div class="label">Experiência ganha</div>'+xpHTML()+learnHTML()+'<div class="label" style="margin-top:6px">Destaques</div>'+awardsHTML(),bindKit:bindLearn,
     buttons:[{label:"Tentar de novo",cls:"go",fn:()=>startBattle(G.bi)},{label:"Voltar ao mapa do reino",fn:()=>{ paintMap(); show("map"); }}]}),900);
 }
 $("flee").onclick=()=>{ stopTimer(); stopSay(); $("sheet").hidden=true; if(G&&!G.over&&G.actions>0) snapshotBattle(); if(G){ G.over=true; if(G.mega){ chapKey=G.prevChap||"c0"; BOSSES=CH().bosses; } } paintMap(); show("map"); };
