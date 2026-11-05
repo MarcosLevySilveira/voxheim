@@ -1171,10 +1171,12 @@ function artWhisper(){ const u="w"+(++UID);
 
 /* ---------- mastery: per student, per item, saved on this device ---------- */
 let MST={}; try{ MST=JSON.parse(localStorage.getItem(LK("vx-mastery"))||"{}")||{}; }catch(e){ MST={}; }
+/* conserta frases salvas sem degrau (bug antigo da Fogueira no modo solo) */
+try{ Object.values(MST).forEach(M=>Object.values(M||{}).forEach(r=>{ if(r&&typeof r==="object"&&!(r.s>=1)){ r.s=r.s0>=1?r.s0:1; if(!(r.s0>=1)) r.s0=r.s; } })); }catch(e){}
 function saveM(){ try{ localStorage.setItem(LK("vx-mastery"),JSON.stringify(MST)); }catch(e){} }
 const hkey=n=>String(n).trim().toLowerCase();
 function recOf(h,id){ const M=MST[h.key]||(MST[h.key]={}); return M[id]; }
-function ensureRec(h,id){ const M=MST[h.key]||(MST[h.key]={}); if(!M[id]) M[id]={s:h.start,s0:h.start,d0:Date.now(),ok:0,f:0,seen:0}; return M[id]; }
+function ensureRec(h,id){ const M=MST[h.key]||(MST[h.key]={}); const st=h.start||1; if(!M[id]) M[id]={s:st,s0:st,d0:Date.now(),ok:0,f:0,seen:0}; else if(!(M[id].s>=1)) M[id].s=M[id].s0>=1?M[id].s0:1; return M[id]; }
 const STEP_N={1:"Ouça e toque",2:"Ouça e repita",3:"Escolha e fale",4:"Lembre",5:"Use na situação"};
 function pickItem(h){
   if(chapKey==="mx") return miyagiPick(h,false);
@@ -2047,7 +2049,7 @@ const NODES={
  evento:{n:"Encontro",d:"Alguém precisa de ajuda. Risco e recompensa.",ic:'<circle cx="16" cy="16" r="11"/><path d="M16 9v9M16 22v1"/>'},
  mercador:{n:"Mercador",d:"Peça uma runa em inglês e leve para a batalha.",ic:'<path d="M6 12h20l-2 14H8z"/><path d="M11 12a5 5 0 0 1 10 0"/>'}};
 let EXP=null;
-function expHero(){ const n=(NAMES[0]||"").trim()||"Herói 1"; return {name:n,key:hkey(n),cls:heroCls[0],learn:{},speaks:0,fails:0,charge:0}; }
+function expHero(){ const n=(NAMES[0]||"").trim()||"Herói 1"; return {name:n,key:hkey(n),cls:heroCls[0],start:heroStart[0]||1,learn:{},speaks:0,fails:0,charge:0}; }
 function startExpedition(s){
   const pick=(arr,k)=>shuffle(arr.slice()).slice(0,k);
   const rows=[pick(["taverna","treino","evento"],2),shuffle(["mercador",rnd(["taverna","evento","treino"])]),pick(["taverna","treino","evento"],2)];
