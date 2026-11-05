@@ -406,7 +406,7 @@ header{display:flex;align-items:center;gap:12px;border:1px solid var(--gold);pad
 .pl-ov{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:radial-gradient(circle at 50% 30%,#2a1e40,#0D0C11 72%);padding:16px;overflow:auto}
 .pl-card{width:100%;max-width:520px;display:flex;flex-direction:column;gap:10px}
 .pl-top{display:flex;justify-content:space-between;align-items:center}.pl-x{min-width:40px;padding:6px 10px}
-.pl-pips{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.pl-pips span{border:1px solid var(--line);padding:5px 4px;text-align:center;font-size:11px;color:var(--ash);letter-spacing:.06em}.pl-pips b{display:block;font-family:var(--display);font-weight:400;font-size:18px}
+.pl-pips{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.pl-pips span{border:1px solid var(--line);padding:5px 4px;text-align:center;font-size:11px;color:var(--ash);letter-spacing:.06em}.pl-pips b{display:block;font-family:var(--display);font-weight:400;font-size:18px}
 .pl-pips span.now{border-color:var(--gold);color:var(--gold)}.pl-pips span.ok{background:rgba(92,196,180,.15);border-color:#5CC4B4;color:#5CC4B4}
 .pl-card h3{font-size:26px;margin:4px 0 0;font-weight:400}.pl-who{font-size:13px;color:var(--ash);margin:0}
 .pl-sit{font-style:italic;color:var(--ash);margin:0}.pl-q{margin:0;font-weight:700}.pl-pt{font-family:var(--display);font-size:22px;margin:0;color:#f6e2a6}
@@ -4773,7 +4773,7 @@ $("camp-open").onclick=()=>{ sfx.pick(); openSlots(); }; paintSlotBar(); tour("s
 { const _pr=paintRegion; paintRegion=function(){ _pr.apply(this,arguments); try{ const R=REGIONS[selR], box=$("space-detail"); if(R&&R.ch&&box&&!R.soon){ const h=trRegionHTML(R.ch); if(h) box.insertAdjacentHTML("beforeend",h); } }catch(e){} try{ preloadChap(REGIONS[selR].ch); }catch(e){} if(tutSeen().map&&!$("map").hidden&&document.querySelector("#space-detail [data-st]")) tour("region"); }; }
 function show(id){ ["setup","atlas","expedition","map","battle","journey","grimoire"].forEach(s=>$(s).hidden=s!==id); window.scrollTo(0,0); if(TOURS[id]) tour(id); }
 /* ---------- Prova dos Portões: teste de nivelamento (abre o livro do nível de quem já fala inglês) ---------- */
-const PL_GATES=[{n:"Portão do Reino",lvl:"A1–A2",bk:"Livro I"},{n:"Portão das Marés",lvl:"B1",bk:"Livro II"},{n:"Portão da Cordilheira",lvl:"B2",bk:"Livro III"},{n:"Portão dos Espelhos",lvl:"C1",bk:"Livro IV"}];
+const PL_GATES=[{n:"Portão do Reino",lvl:"A1–A2",bk:"Livro I"},{n:"Portão das Marés",lvl:"B1",bk:"Livro II"},{n:"Portão da Cordilheira",lvl:"B2",bk:"Livro III"},{n:"Portão dos Espelhos",lvl:"C1",bk:"Livro IV"},{n:"Portão do Céu",lvl:"C2",bk:"Livro V"}];
 function plPool(g){ return (BOOKREG[ROUTE[g]]||[]).filter(R=>R.ch&&R.ch!=="c0"&&R.ch!=="c14"&&CHAPTERS[R.ch]&&CHAPTERS[R.ch].data).flatMap(R=>CHAPTERS[R.ch].data.items||[]).filter(x=>x.en&&x.wrong&&x.cl); }
 function plGap(x){ const cl=x.cl.replace(/\s*\([^)]*\)\s*$/,""), p=cl.split("___"); if(p.length!==2) return null;
   if(!x.en.startsWith(p[0])||!x.en.endsWith(p[1])||x.en.length<p[0].length+p[1].length+1) return null;
@@ -4796,7 +4796,7 @@ function openPlacement(){ ac();
   const pips=()=>'<div class="pl-pips">'+PL_GATES.map((G0,i)=>'<span class="'+(i<g?'ok':i===g?'now':'')+'"><b>'+(i+1)+'</b>'+esc(G0.lvl)+'</span>').join("")+'</div>';
   const head=()=>'<div class="pl-top"><span class="tag">Prova dos Portões</span><button type="button" class="ghost pl-x" aria-label="Fechar o teste">✕</button></div>'+pips();
   const frame=body=>{ ov.innerHTML='<div class="pl-card">'+head()+body+'</div>'; ov.querySelector(".pl-x").onclick=()=>{ sfx.pick(); close(); }; };
-  const intro=()=>{ frame('<h3 class="display">Já fala um pouco de inglês?</h3><p class="intro">São quatro portões, do básico ao avançado, com 4 desafios cada: escolher a frase certa, completar uma lacuna e falar uma frase em inglês.'+(SOLO?'':' Os heróis se revezam.')+' Acertou 3 de 4, abre o próximo portão. O teste termina no primeiro portão que ficar fechado, e o jogo começa no livro desse nível.</p><p class="intro" style="font-size:12.5px">Leva uns 5 minutos. Não use tradutor: o teste só serve se mostrar o nível de verdade. Os livros anteriores continuam abertos para revisar.</p><button type="button" class="primary" id="pl-go">Começar o teste</button>');
+  const intro=()=>{ frame('<h3 class="display">Já fala um pouco de inglês?</h3><p class="intro">São cinco portões, do básico ao avançado, com 4 desafios cada: escolher a frase certa, completar uma lacuna e falar uma frase em inglês.'+(SOLO?'':' Os heróis se revezam.')+' Acertou 3 de 4, abre o próximo portão. O teste termina no primeiro portão que ficar fechado, e o jogo começa no livro desse nível.</p><p class="intro" style="font-size:12.5px">Leva uns 6 minutos. Não use tradutor: o teste só serve se mostrar o nível de verdade. Os livros anteriores continuam abertos para revisar.</p><button type="button" class="primary" id="pl-go">Começar o teste</button>');
     ov.querySelector("#pl-go").onclick=()=>{ sfx.card(); ask(); }; };
   const who=()=>names[turn%names.length];
   const next=ok=>{ if(stopL){ stopL(); stopL=null; } if(ok) hits++; qi++; turn++; tries=0; revealed=false;
@@ -4833,9 +4833,9 @@ function openPlacement(){ ac();
       frame('<div class="pl-res"><span class="tag">Portão aberto</span><h3 class="display">'+esc(G0.n)+' · '+esc(G0.lvl)+'</h3><p class="intro">'+hits+' de '+Q.length+'. Vamos ao próximo nível: '+esc(PL_GATES[g+1].lvl)+'.</p><button type="button" class="primary" id="pl-on">Próximo portão</button></div>');
       ov.querySelector("#pl-on").onclick=()=>{ sfx.card(); g++; Q=plBuild(g); qi=0; hits=0; ask(); }; return; }
     result(); };
-  const result=()=>{ const start=Math.min(passed,ROUTE.length-2), W=WORLD.find(w=>w.id===ROUTE[start]);
+  const result=()=>{ g=passed; const start=Math.min(passed,ROUTE.length-1), W=WORLD.find(w=>w.id===ROUTE[start]);
     progress.placed=Math.max(progress.placed|0,start); saveProgress(); atSel=ROUTE[start]; sfx.card();
-    const msg=passed===0?"Comece pelo começo: o Livro I vai firmar a base, e ela vai crescer rápido.":passed>=PL_GATES.length?(SOLO?"Você passou":"Vocês passaram")+" por todos os portões. O Livro IV, nível C1, é o mais alto aberto hoje.":"Os livros anteriores ficam abertos para revisar o que precisar.";
+    const msg=passed===0?"Comece pelo começo: o Livro I vai firmar a base, e ela vai crescer rápido.":passed>=PL_GATES.length?(SOLO?"Você passou":"Vocês passaram")+" por todos os portões. O Livro V, nível C2, é o último: lá cada um encontra a própria voz.":"Os livros anteriores ficam abertos para revisar o que precisar.";
     frame('<div class="pl-res"><span class="tag">Resultado</span><h3 class="display">Comecem no '+esc(PL_GATES[start].bk)+'</h3><p class="pl-world">'+esc(W.n)+' · nível '+esc(W.lvl)+'</p><p class="intro">'+esc(msg)+'</p><button type="button" class="primary" id="pl-enter">Entrar em Voxheim</button></div>');
     ov.querySelector("#pl-enter").onclick=()=>{ close(); $("to-map").click(); }; };
   intro();
