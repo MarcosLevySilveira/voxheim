@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Voxheim · Corrida Falada (protótipo)</title>
+<meta name="theme-color" content="#0D0C11">
+<style>
+:root{--void:#0D0C11;--slab:#16141c;--line:#2a2633;--bone:#EEE6D3;--ash:#A69D8E;--gold:#C9A45C;--teal:#5CC4B4;--red:#C8464F;--ghost:#5cf0c0}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--void);color:var(--bone);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
+#view{position:relative;flex:1;min-height:0}
+#view canvas{display:block;width:100%;height:100%}
+.hud-top{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:calc(env(safe-area-inset-top) + 8px) 10px 0;pointer-events:none}
+.chip{background:rgba(13,12,17,.82);border:1px solid var(--line);padding:6px 10px;border-radius:10px;font-size:13px;line-height:1.25}
+.chip b{font-size:18px}
+.pos b{color:var(--gold)}
+.wx{text-align:right}
+#radio{position:absolute;left:10px;right:10px;bottom:10px;background:rgba(13,12,17,.88);border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:10px;padding:8px 12px;font-size:14px;line-height:1.35;transition:opacity .3s}
+#radio .who{font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--teal)}
+#radio .en{font-weight:700}
+#radio .pt{color:var(--ash);font-size:12px}
+#lights{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);display:flex;gap:10px;background:rgba(13,12,17,.85);padding:12px 16px;border-radius:14px;border:1px solid var(--line)}
+#lights i{width:28px;height:28px;border-radius:50%;background:#2a2633;display:block}
+#lights i.on{background:#e0453a;box-shadow:0 0 14px #e0453a}
+#panel{flex:0 0 auto;background:var(--slab);border-top:1px solid var(--line);padding:10px 12px calc(env(safe-area-inset-bottom) + 10px)}
+.meters{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.m{background:var(--void);border:1px solid var(--line);border-radius:10px;padding:6px 8px}
+.m small{display:block;font-size:10px;letter-spacing:.1em;color:var(--ash);font-weight:700}
+.m b{font-size:16px}
+.bar{height:6px;background:#2a2633;border-radius:3px;margin-top:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--teal);width:50%}
+#mic{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;min-height:56px;border:0;border-radius:14px;background:var(--gold);color:var(--void);font-size:17px;font-weight:800;cursor:pointer}
+#mic.on{background:var(--teal);animation:pulse 1s infinite}
+@keyframes pulse{50%{filter:brightness(1.15)}}
+#heard{min-height:18px;font-size:12px;color:var(--ash);text-align:center;margin:6px 0 2px}
+.cmds{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.cmds button{border:1px solid var(--line);background:var(--void);color:var(--bone);border-radius:999px;padding:7px 11px;font-size:13px;cursor:pointer}
+.cmds button.cur{border-color:var(--gold);color:var(--gold)}
+#over{position:fixed;inset:0;background:rgba(13,12,17,.94);display:flex;align-items:center;justify-content:center;padding:24px;z-index:5}
+#over .box{max-width:420px;text-align:center}
+#over h1{font-family:Georgia,serif;font-weight:400;font-size:30px;color:var(--gold);margin:0 0 10px}
+#over p{color:var(--ash);line-height:1.5;font-size:15px;margin:0 0 14px}
+#over ul{text-align:left;color:var(--bone);font-size:14px;line-height:1.6;padding-left:18px;margin:0 0 18px}
+#over button{border:0;border-radius:12px;background:var(--gold);color:var(--void);font-weight:800;font-size:17px;padding:14px 26px;cursor:pointer}
+.tag{display:inline-block;font-size:11px;letter-spacing:.14em;font-weight:700;color:var(--teal);margin-bottom:8px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div id="app">
+ <div id="view">
+  <div class="hud-top">
+   <div class="chip pos">Volta <b id="lap">1</b>/4<br>Posição <b id="pos">P2</b> <span id="gap"></span></div>
+   <div class="chip wx"><span id="wx">Pista seca</span><br><small id="cam">toque na pista: câmera</small></div>
+  </div>
+  <div id="lights" hidden><i></i><i></i><i></i><i></i><i></i></div>
+  <div id="radio"><div class="who">RÁDIO DA EQUIPE</div><div class="en" lang="en" id="r-en">Radio check. Can you hear me?</div><div class="pt" id="r-pt">Teste de rádio.</div></div>
+ </div>
+ <div id="panel">
+  <div class="meters">
+   <div class="m"><small>MODO</small><b id="mode">NORMAL</b></div>
+   <div class="m"><small>BATERIA</small><b id="bat">100%</b><div class="bar"><i id="batb"></i></div></div>
+   <div class="m"><small>PNEU</small><b id="tyre">SECO</b><div class="bar"><i id="tyreb" style="background:#f2c46a"></i></div></div>
+  </div>
+  <button id="mic" type="button"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Falar com o engenheiro</span></button>
+  <div id="heard" aria-live="polite"></div>
+  <div class="cmds" id="cmds">
+   <button type="button" data-say="Push now!">Push now!</button>
+   <button type="button" data-say="Keep it steady.">Keep it steady.</button>
+   <button type="button" data-say="Save the battery.">Save the battery.</button>
+   <button type="button" data-say="Box this lap, wet tires!">Box, wet tires!</button>
+   <button type="button" data-say="Box this lap, dry tires!">Box, dry tires!</button>
+  </div>
+ </div>
+</div>
+<div id="over"><div class="box">
+ <span class="tag">VOXHEIM · AUTÓDROMO DAS VOZES · PROTÓTIPO</span>
+ <h1>Corrida Falada</h1>
+ <p>Você não pilota: você é o estrategista. O carro só obedece ao que você <b>fala em inglês</b> no rádio. Vença o Piloto Fantasma em 4 voltas.</p>
+ <ul>
+  <li><b lang="en">“Push now!”</b>: modo ataque. Mais rápido, gasta bateria e pneu.</li>
+  <li><b lang="en">“Keep it steady.”</b>: modo normal.</li>
+  <li><b lang="en">“Save the battery.”</b>: economia. Recarrega a bateria.</li>
+  <li><b lang="en">“Box this lap, wet tires!”</b>: para no box e troca o pneu. Vai chover…</li>
+ </ul>
+ <button id="start" type="button">Largar</button>
+ <p style="margin-top:12px;font-size:12px">Sem microfone? Toque nas frases embaixo do botão.</p>
+</div></div>
+<script src="three.min.js"></script>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+/* ---------- pista ---------- */
+const PTS=[[0,0],[140,0],[200,25],[215,85],[175,135],[105,128],[70,170],[0,185],[-65,160],[-85,95],[-55,40]];
+const curve=new THREE.CatmullRomCurve3(PTS.map(p=>new THREE.Vector3(p[0],0,p[1])),true,'centripetal');
+const L=curve.getLength(), W=16, N=700;
+const scene=new THREE.Scene(); const SKY=new THREE.Color(0x8fb4d8), SKYR=new THREE.Color(0x4a5866);
+scene.background=SKY.clone(); scene.fog=new THREE.Fog(SKY.clone(),180,520);
+const renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1)); renderer.shadowMap.enabled=true;
+$('view').prepend(renderer.domElement);
+const camera=new THREE.PerspectiveCamera(55,1,0.5,1200);
+const hemi=new THREE.HemisphereLight(0xdfefff,0x3a5a2a,.75); scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xfff2d8,.9); sun.position.set(120,200,80); sun.castShadow=true; sun.shadow.mapSize.set(2048,2048);
+Object.assign(sun.shadow.camera,{left:-260,right:260,top:260,bottom:-260,near:10,far:600}); scene.add(sun);
+const grass=new THREE.Mesh(new THREE.PlaneGeometry(1400,1400),new THREE.MeshLambertMaterial({color:0x3f7a3a})); grass.rotation.x=-Math.PI/2; grass.position.y=-0.05; grass.receiveShadow=true; scene.add(grass);
+function frameAt(u){ const p=curve.getPointAt(((u%1)+1)%1), t=curve.getTangentAt(((u%1)+1)%1).normalize(); const n=new THREE.Vector3(-t.z,0,t.x); return {p,t,n}; }
+function ribbon(off0,off1,y,colorFn){ const pos=[],col=[],idx=[]; for(let i=0;i<=N;i++){ const f=frameAt(i/N); const a=f.p.clone().addScaledVector(f.n,off0), b=f.p.clone().addScaledVector(f.n,off1); pos.push(a.x,y,a.z,b.x,y,b.z); const c=colorFn(i); col.push(c.r,c.g,c.b,c.r,c.g,c.b); if(i<N){ const k=i*2; idx.push(k,k+1,k+2,k+1,k+3,k+2); } }
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); g.setAttribute('color',new THREE.Float32BufferAttribute(col,3)); g.setIndex(idx); g.computeVertexNormals(); return g; }
+const roadMat=new THREE.MeshLambertMaterial({vertexColors:true}); const ROAD=new THREE.Color(0x45454f), ROADW=new THREE.Color(0x2c2d36);
+const road=new THREE.Mesh(ribbon(-W/2,W/2,0.02,()=>ROAD),roadMat); road.receiveShadow=true; scene.add(road);
+const kr=new THREE.Color(0xc8464f), kw=new THREE.Color(0xf2ece0);
+scene.add(new THREE.Mesh(ribbon(-W/2-2.2,-W/2,0.04,i=>((i>>2)&1)?kr:kw),new THREE.MeshLambertMaterial({vertexColors:true})));
+scene.add(new THREE.Mesh(ribbon(W/2,W/2+2.2,0.04,i=>((i>>2)&1)?kr:kw),new THREE.MeshLambertMaterial({vertexColors:true})));
+// pit lane no fim da reta principal (por dentro)
+const PIT0=0.90, PIT1=1.08, PITOFF=-W/2-9;
+{ const pos=[],idx=[]; const M=120; for(let i=0;i<=M;i++){ const u=PIT0+(PIT1-PIT0)*i/M, f=frameAt(u); const a=f.p.clone().addScaledVector(f.n,PITOFF-4), b=f.p.clone().addScaledVector(f.n,PITOFF+4); pos.push(a.x,.03,a.z,b.x,.03,b.z); if(i<M){ const k=i*2; idx.push(k,k+1,k+2,k+1,k+3,k+2); } }
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); g.setIndex(idx); g.computeVertexNormals(); const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({color:0x34343c})); m.receiveShadow=true; scene.add(m);
+  const f=frameAt(0); for(let k=0;k<6;k++){ const box=new THREE.Mesh(new THREE.BoxGeometry(7,5,7),new THREE.MeshLambertMaterial({color:k%2?0x1f5d58:0x24242c})); const q=frameAt(-0.04+k*0.012); box.position.copy(q.p).addScaledVector(q.n,PITOFF-9); box.position.y=2.5; box.rotation.y=Math.atan2(q.t.x,q.t.z); box.castShadow=true; scene.add(box); } }
+// linha de chegada xadrez
+{ const cv=document.createElement('canvas'); cv.width=64; cv.height=16; const x=cv.getContext('2d'); for(let i=0;i<16;i++) for(let j=0;j<4;j++){ x.fillStyle=(i+j)%2?'#111':'#eee'; x.fillRect(i*4,j*4,4,4); }
+  const tx=new THREE.CanvasTexture(cv); tx.magFilter=THREE.NearestFilter; const f=frameAt(0); const m=new THREE.Mesh(new THREE.PlaneGeometry(W,3),new THREE.MeshBasicMaterial({map:tx})); m.rotation.x=-Math.PI/2; m.rotation.z=-Math.atan2(f.t.z,f.t.x)+Math.PI/2; m.position.set(f.p.x,.06,f.p.z); scene.add(m);
+  const gan=new THREE.Group(); const legM=new THREE.MeshLambertMaterial({color:0x2a2633}); [-1,1].forEach(s=>{ const l=new THREE.Mesh(new THREE.BoxGeometry(1,9,1),legM); l.position.set(0,4.5,s*(W/2+2)); gan.add(l); }); const top=new THREE.Mesh(new THREE.BoxGeometry(1.4,2,W+6),new THREE.MeshLambertMaterial({color:0xc9a45c})); top.position.y=9.5; gan.add(top); gan.position.copy(f.p); gan.rotation.y=Math.atan2(f.t.x,f.t.z)+Math.PI/2; scene.add(gan); }
+// arquibancadas e árvores
+{ const stand=(u,side,len)=>{ const f=frameAt(u); const g=new THREE.Group(); for(let r=0;r<5;r++){ const s=new THREE.Mesh(new THREE.BoxGeometry(len,1.6,3),new THREE.MeshLambertMaterial({color:r%2?0x6a6a78:0x585866})); s.position.set(0,r*1.6+0.8,r*3); s.castShadow=true; g.add(s);
+      for(let c=0;c<len/3;c++){ const p=new THREE.Mesh(new THREE.BoxGeometry(1,1.4,1),new THREE.MeshLambertMaterial({color:[0xc8464f,0x3a7ae0,0xf2c83a,0xf2ece0,0x3ab86a][(c*7+r*3)%5]})); p.position.set(-len/2+1.5+c*3,r*1.6+2.3,r*3); g.add(p); } }
+    const roof=new THREE.Mesh(new THREE.BoxGeometry(len,0.6,17),new THREE.MeshLambertMaterial({color:0xd8d8e0})); roof.position.set(0,12,6); g.add(roof);
+    g.position.copy(f.p).addScaledVector(f.n,side*(W/2+8)); g.rotation.y=Math.atan2(f.t.x,f.t.z)+Math.PI/2+(side>0?Math.PI:0); scene.add(g); };
+  stand(0.03,1,60); stand(0.42,1,40); stand(0.70,-1,44);
+  const trunk=new THREE.MeshLambertMaterial({color:0x5a3a22}), leaf=new THREE.MeshLambertMaterial({color:0x2a5a2a}); let seed=7; const rnd=()=>{ seed=(seed*9301+49297)%233280; return seed/233280; };
+  for(let i=0;i<90;i++){ const u=rnd(), side=rnd()<.5?-1:1, f=frameAt(u), d=W/2+22+rnd()*70; const t=new THREE.Group(); const a=new THREE.Mesh(new THREE.CylinderGeometry(.6,.8,4,6),trunk); a.position.y=2; const b=new THREE.Mesh(new THREE.ConeGeometry(3.2+rnd()*2,8+rnd()*4,7),leaf); b.position.y=8; a.castShadow=b.castShadow=true; t.add(a,b); t.position.copy(f.p).addScaledVector(f.n,side*d); scene.add(t); } }
+/* ---------- carros ---------- */
+function car(body,accent,ghost){ const g=new THREE.Group(); const op=ghost?{transparent:true,opacity:.55,emissive:new THREE.Color(body),emissiveIntensity:.35}:{};
+  const mb=new THREE.MeshLambertMaterial(Object.assign({color:body},op)), ma=new THREE.MeshLambertMaterial(Object.assign({color:accent},op)), mt=new THREE.MeshLambertMaterial(Object.assign({color:0x15151a},op));
+  const add=(geo,m,x,y,z)=>{ const o=new THREE.Mesh(geo,m); o.position.set(x,y,z); o.castShadow=!ghost; g.add(o); return o; };
+  add(new THREE.BoxGeometry(1.5,.7,5.2),mb,0,.75,0); add(new THREE.BoxGeometry(.9,.5,2.2),mb,0,.65,3.4);
+  add(new THREE.BoxGeometry(3.4,.18,.9),ma,0,.45,4.5); add(new THREE.BoxGeometry(3,.18,.8),ma,0,1.55,-2.6); add(new THREE.BoxGeometry(.2,.9,.6),mt,-1.2,1.1,-2.6); add(new THREE.BoxGeometry(.2,.9,.6),mt,1.2,1.1,-2.6);
+  add(new THREE.BoxGeometry(2.6,.5,1.6),mb,0,.65,-.3); add(new THREE.SphereGeometry(.45,10,8),new THREE.MeshLambertMaterial(Object.assign({color:ghost?0x5cf0c0:0xf2c46a},op)),0,1.35,.4);
+  const wg=new THREE.CylinderGeometry(.62,.62,.6,14); wg.rotateZ(Math.PI/2); [[-1.25,1.7],[1.25,1.7],[-1.3,-1.7],[1.3,-1.7]].forEach(([x,z])=>add(wg,mt,x,.62,z));
+  return g; }
+const ME={name:'Guilda',mesh:car(0xc9a45c,0x1f5d58,false),s:0,off:-3.2,mode:'normal',bat:100,wear:0,tyre:'dry',pitReq:null,pit:0,stop:0,done:false,t:0};
+const GH={name:'Fantasma',mesh:car(0x5cf0c0,0x1a3a2a,true),s:-6,off:3.2,mode:'normal',bat:100,wear:0,tyre:'dry',pitReq:null,pit:0,stop:0,done:false,t:0,ai:true};
+scene.add(ME.mesh,GH.mesh);
+/* ---------- chuva ---------- */
+const RN=2200, rg=new THREE.BufferGeometry(), rp=new Float32Array(RN*3); for(let i=0;i<RN;i++){ rp[i*3]=(Math.random()-.5)*160; rp[i*3+1]=Math.random()*60; rp[i*3+2]=(Math.random()-.5)*160; }
+rg.setAttribute('position',new THREE.BufferAttribute(rp,3)); const rain=new THREE.Points(rg,new THREE.PointsMaterial({color:0xcfe0f0,size:.35,transparent:true,opacity:0})); scene.add(rain);
+/* ---------- simulação ---------- */
+const LAPS=4, V0=L/26; let race={on:false,t:0,rain:0,rainAt:null,warned:0,over:false}, camMode=0;
+const MODES={push:{v:1.07,bat:-6.5,wear:1.5,n:'ATAQUE'},normal:{v:1,bat:-.6,wear:.9,n:'NORMAL'},save:{v:.94,bat:4.2,wear:.5,n:'ECONOMIA'}};
+function lapOf(c){ return Math.max(1,Math.floor(c.s/L)+1); }
+function speed(c){ const M=MODES[c.mode]; let v=V0*(c.ai?.99:1)*M.v; if(c.mode==="push"&&c.bat<=0) v=V0*.99*(c.ai?.99:1);
+  v*=1-.0022*c.wear; const wet=race.rain>.5; if(c.tyre==='dry'&&wet) v*=.8+.2*(1-Math.min(1,(race.rain-.5)*2)); if(c.tyre==='wet'&&!wet) v*=.93; if(c.tyre==='wet'&&wet) v*=.965; return v; }
+function step(c,dt){ if(c.done) return; const u=(c.s/L)%1, lap=lapOf(c);
+  if(c.stop>0){ c.stop-=dt; if(c.stop<=0){ c.tyre=c.pitReq; c.wear=0; c.pitReq=null; if(c===ME) radio("Tires on! Go, go, go!","Pneus trocados! Vai, vai, vai!"); } return; }
+  const inPitZone=(u>=PIT0)||(u<=PIT1-1);
+  if(c.pitReq&&!c.pit&&u>=PIT0&&u<PIT0+.02&&lap<LAPS) c.pit=1;
+  let v=speed(c); if(c.pit){ v=Math.min(v,V0*.42); if(u<PIT1-1&&u>0.0&&c.pit===1&&u>0.004){ c.pit=2; c.stop=2.6; return; } if(c.pit===2&&u>PIT1-1) c.pit=0; if(!inPitZone) c.pit=0; }
+  const M=MODES[c.mode]; c.bat=Math.max(0,Math.min(100,c.bat+M.bat*dt)); c.wear=Math.min(100,c.wear+M.wear*dt*(c.tyre==='dry'&&race.rain>.5?1.3:1));
+  c.s+=v*dt; if(c.s>=L*LAPS){ c.done=true; c.t=race.t; } }
+function ai(c){ if(c.done||c.stop>0) return; if(c.bat>70) c.mode='push'; else if(c.bat<25) c.mode='save'; else if(c.mode==='push'&&c.bat<45) c.mode='normal';
+  if(race.rainAt!==null&&race.t>race.rainAt+8&&c.tyre==="dry"&&!c.pitReq) c.pitReq='wet'; }
+function place(c){ const u=(c.s/L), f=frameAt(u); let off=c.off; if(c.pit||c.stop>0){ const uu=((u%1)+1)%1; const k=c.stop>0?1:c.pit===2?Math.max(0,Math.min(1,(PIT1-1-uu)/.03)):Math.min(1,Math.max(0,uu-PIT0)*40); off=c.off+(PITOFF-c.off)*k; }
+  c.mesh.position.copy(f.p).addScaledVector(f.n,off); c.mesh.rotation.y=Math.atan2(f.t.x,f.t.z); }
+/* ---------- rádio e voz ---------- */
+let rT=0; function radio(en,pt){ $('r-en').textContent=en; $('r-pt').textContent=pt; $('radio').style.opacity=1; rT=7;
+  try{ if('speechSynthesis' in window){ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(en); u.lang='en-GB'; u.rate=1.02; speechSynthesis.speak(u); } }catch(e){} }
+function parse(t){ const s=' '+t.toLowerCase().replace(/[^a-z' ]/g,' ').replace(/\s+/g,' ')+' ';
+  if(/ (box|pit|pits|pitting|come in) /.test(s)){ const tyre=/ (wet|wets|rain|inter|inters|intermediate) /.test(s)?'wet':/ (dry|drys|slick|slicks|soft|softs|medium|hard) /.test(s)?'dry':null; return {k:'box',tyre}; }
+  if(/ (push|attack|full power|go faster|faster|flat out|overtake) /.test(s)) return {k:'mode',m:'push'};
+  if(/ (save|conserve|battery|slow down|lift|recharge|charge) /.test(s)) return {k:'mode',m:'save'};
+  if(/ (steady|normal|balanced|standard|keep it) /.test(s)) return {k:'mode',m:'normal'};
+  return null; }
+function command(t){ $('heard').textContent='Você disse: “'+t+'”'; const c=parse(t);
+  if(!c){ radio("Say again? I didn't copy.","Repete? Não entendi."); return; }
+  if(c.k==='mode'){ ME.mode=c.m; radio({push:"Copy. Push mode. Go for it!",save:"Copy. Saving the battery.",normal:"Copy. Keeping it steady."}[c.m],{push:"Entendido. Modo ataque.",save:"Entendido. Economizando bateria.",normal:"Entendido. Modo normal."}[c.m]); }
+  if(c.k==='box'){ if(!c.tyre){ radio("Box confirmed. Which tires? Wet or dry?","Box confirmado. Qual pneu? Chuva ou seco?"); return; } if(lapOf(ME)>=LAPS){ radio("Negative, it's the last lap. Stay out!","Negativo, é a última volta. Fica na pista!"); return; }
+    ME.pitReq=c.tyre; radio(c.tyre==='wet'?"Copy. Box this lap for wets.":"Copy. Box this lap for dry tires.",c.tyre==='wet'?"Entendido. Box nesta volta, pneu de chuva.":"Entendido. Box nesta volta, pneu seco."); }
+  paintHud(); }
+const SRc=window.SpeechRecognition||window.webkitSpeechRecognition; let rec=null, listening=false;
+$('mic').onclick=()=>{ if(!SRc){ $('heard').textContent='Este navegador não reconhece fala. Use as frases abaixo.'; return; } if(listening){ try{rec.stop();}catch(e){} return; }
+  rec=new SRc(); rec.lang='en-US'; rec.interimResults=false; rec.maxAlternatives=3; listening=true; $('mic').classList.add('on'); $('mic').querySelector('span').textContent='Ouvindo… fale agora';
+  rec.onresult=e=>{ const alts=[...e.results[0]].map(a=>a.transcript); const best=alts.find(a=>parse(a))||alts[0]; command(best); };
+  rec.onerror=e=>{ if(e.error!=='no-speech') $('heard').textContent='Microfone: '+e.error; };
+  rec.onend=()=>{ listening=false; $('mic').classList.remove('on'); $('mic').querySelector('span').textContent='Falar com o engenheiro'; };
+  try{ rec.start(); }catch(e){ listening=false; } };
+$('cmds').onclick=e=>{ const b=e.target.closest('button'); if(b) command(b.dataset.say); };
+$('view').addEventListener('click',e=>{ if(e.target.closest('#radio')) return; camMode=(camMode+1)%3; $('cam').textContent=['câmera: perseguição','câmera: TV','câmera: aérea'][camMode]; });
+/* ---------- HUD ---------- */
+function paintHud(){ $('lap').textContent=Math.min(LAPS,lapOf(ME)); const ahead=ME.s>=GH.s; $('pos').textContent=ahead?'P1':'P2';
+  const gap=Math.abs(ME.s-GH.s)/V0; $('gap').textContent=(ahead?'+':'−')+gap.toFixed(1)+' s';
+  $('mode').textContent=MODES[ME.mode].n; $('mode').style.color=ME.mode==='push'?'#e0453a':ME.mode==='save'?'#5CC4B4':'';
+  $('bat').textContent=Math.round(ME.bat)+'%'; $('batb').style.width=ME.bat+'%';
+  $('tyre').textContent=(ME.tyre==='wet'?'CHUVA':'SECO')+(ME.pitReq?' → box':''); $('tyreb').style.width=(100-ME.wear)+'%'; $('tyreb').style.background=ME.tyre==='wet'?'#3a7ae0':'#f2c46a';
+  $('wx').textContent=race.rain>.5?'Chuva forte':race.rain>0?'Começou a chover':race.warned?'Chuva a caminho':'Pista seca';
+  document.querySelectorAll('#cmds button').forEach(b=>{ const c=parse(b.dataset.say); b.classList.toggle('cur',!!(c&&c.k==='mode'&&c.m===ME.mode)); }); }
+/* ---------- câmera ---------- */
+const camPos=new THREE.Vector3(0,30,-40), camLook=new THREE.Vector3();
+function updCam(dt){ const f=frameAt(ME.s/L), p=ME.mesh.position; let want, look;
+  if(camMode===0){ want=p.clone().addScaledVector(f.t,-17).add(new THREE.Vector3(0,7.5,0)); look=p.clone().addScaledVector(f.t,12); }
+  else if(camMode===1){ const g=frameAt(Math.floor((ME.s/L)*8)/8+.02); want=g.p.clone().addScaledVector(g.n,W/2+26).add(new THREE.Vector3(0,14,0)); look=p.clone(); }
+  else { want=p.clone().add(new THREE.Vector3(0,95,-35)); look=p.clone(); }
+  const k=1-Math.pow(.02,dt); camPos.lerp(want,k); camLook.lerp(look,k); camera.position.copy(camPos); camera.lookAt(camLook);
+  rain.position.set(p.x,0,p.z); }
+/* ---------- laço ---------- */
+let last=performance.now();
+function resize(){ const v=$('view'); renderer.setSize(v.clientWidth,v.clientHeight,false); camera.aspect=v.clientWidth/Math.max(1,v.clientHeight); camera.updateProjectionMatrix(); }
+addEventListener('resize',resize);
+const FAST=+(new URLSearchParams(location.search).get('fast'))||1;
+function loop(now){ const dt=Math.min(.05,(now-last)/1000)*FAST; last=now;
+  if(race.on&&!race.over){ race.t+=dt; ai(GH); step(ME,dt); step(GH,dt);
+    const lead=Math.max(ME.s,GH.s)/L;
+    if(!race.warned&&lead>1.45){ race.warned=1; radio("Rain is coming in about one lap. Copy?","Chuva chegando em mais ou menos uma volta. Entendido?"); }
+    if(race.rainAt===null&&lead>2.15){ race.rainAt=race.t; radio("It's raining now! Box for wet tires?","Começou a chover! Box para pneu de chuva?"); }
+    if(race.rainAt!==null) race.rain=Math.min(1,(race.t-race.rainAt)/6);
+    if(ME.bat<15&&ME.mode==='push'&&!race.lowbat){ race.lowbat=1; radio("Battery is low. Save energy!","Bateria baixa. Economize!"); } if(ME.bat>40) race.lowbat=0;
+    if(ME.done&&GH.done||ME.done&&!GH.done&&race.t>ME.t+.1||GH.done&&!ME.done&&race.t>GH.t+.1){ finish(); }
+    paintHud(); }
+  if(rT>0){ rT-=dt; if(rT<=0) $('radio').style.opacity=.55; }
+  const r=race.rain; scene.background.copy(SKY).lerp(SKYR,r); scene.fog.color.copy(scene.background); sun.intensity=.9-.5*r; hemi.intensity=.75-.25*r; rain.material.opacity=.75*r;
+  if(r>0){ const a=rg.attributes.position.array; for(let i=0;i<RN;i++){ a[i*3+1]-=70*dt; if(a[i*3+1]<0) a[i*3+1]=60; } rg.attributes.position.needsUpdate=true; }
+  place(ME); place(GH); updCam(dt); renderer.render(scene,camera); requestAnimationFrame(loop); }
+function finish(){ if(race.over) return; race.over=true; const win=ME.done&&(!GH.done||ME.t<=GH.t);
+  radio(win?"P1! You beat the Ghost! What a race!":"P2. The Ghost was faster this time.",win?"P1! Você venceu o Fantasma!":"P2. O Fantasma foi mais rápido desta vez.");
+  setTimeout(()=>{ $('over').hidden=false; $('over').querySelector('h1').textContent=win?'Vitória!':'Quase lá'; $('over').querySelector('p').innerHTML=win?'Você venceu o Piloto Fantasma falando inglês no rádio.':'O Fantasma venceu. Tente parar na hora certa quando a chuva chegar e use o modo ataque com a bateria cheia.'; $('over').querySelector('ul').hidden=true; $('start').textContent='Correr de novo'; },2500); }
+function startRace(){ Object.assign(ME,{s:0,mode:'normal',bat:100,wear:0,tyre:'dry',pitReq:null,pit:0,stop:0,done:false,t:0}); Object.assign(GH,{s:-6,mode:'normal',bat:100,wear:0,tyre:'dry',pitReq:null,pit:0,stop:0,done:false,t:0});
+  race={on:false,t:0,rain:0,rainAt:null,warned:0,over:false}; $('over').hidden=true; paintHud(); const li=[...document.querySelectorAll('#lights i')]; $('lights').hidden=false; li.forEach(x=>x.classList.remove('on'));
+  li.forEach((x,i)=>setTimeout(()=>x.classList.add('on'),400+i*600)); setTimeout(()=>{ $('lights').hidden=true; race.on=true; radio("Lights out! Talk to me when you need.","Largada! Fale comigo quando precisar."); },400+5*600+500); }
+$('start').onclick=()=>{ try{ if('speechSynthesis' in window) speechSynthesis.speak(new SpeechSynthesisUtterance('')); }catch(e){} startRace(); };
+resize(); paintHud(); requestAnimationFrame(loop);
+window.__race={ME,GH,race:()=>race,command,startRace};
+})();
+</script>
+</body>
+</html>
