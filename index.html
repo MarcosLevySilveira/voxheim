@@ -4890,7 +4890,7 @@ function matchXg(d){ const M=G.match; if(!M||G.over) return; M.xg+=d; while(M.xg
 function matchRx(n){ const M=G.match; if(!M||G.over) return; M.rx+=n; while(M.rx>=M.RX){ M.rx-=M.RX; M.rg++; floatText("Gol do rival","",FUT_GUILD+" "+M.gg+" × "+M.rg); sfx.bad(); speak("They score!"); setLog("Gol de "+G.B.name+". "+FUT_GUILD+" "+M.gg+" × "+M.rg+"."); } }
 function matchTick(){ const M=G.match; if(!M) return false;
   if(G.actions>=12){ G.over=true; paint(); speak("Full time!"); setTimeout(()=>matchEnd(),900); return true; }
-  if(G.actions===6&&!M.half){ M.half=true; paint(); speak("Half time! Back to the dressing room."); setTimeout(()=>vestiario(()=>{ paint(); if(G.timer<=0) setTimeout(bossTurn,450); else { G.cur=pickNext(G.cur); paint(); } }),900); return true; }
+  if(G.actions===6&&!M.half){ M.half=true; paint(); speak("Half time! Back to the dressing room."); vestiario(()=>{ paint(); if(G.timer<=0) setTimeout(bossTurn,450); else { G.cur=pickNext(G.cur); paint(); } }); return true; }
   return false; }
 function vestJudge(t){ const w=normEn(t), s=" "+w.join(" ")+" "; if(w.length<5) return "Fale uma preleção de pelo menos uma frase completa.";
   return / (need|have|if|let's|lets|we'll|will|must|should|keep|press|stay|don't|dont) /.test(s)?"":"Diga o que o time precisa fazer: We need to…, If we…, we'll…"; }
