@@ -919,6 +919,13 @@ function paintMute(){ const m=$("mute"); m.innerHTML=soundOn?SPK_ON:SPK_OFF; m.s
 $("mute").onclick=()=>{ soundOn=!soundOn; try{localStorage.setItem("vx-sound",soundOn?"on":"off");}catch(e){} paintMute(); };
 paintMute();
 
+/* ---------- métricas anônimas (GoatCounter): só contagens de eventos, sem nomes, sem cookies ---------- */
+const TRK_OFF=/^(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(location.hostname)||location.protocol==="file:";
+if(!TRK_OFF){ try{ window.goatcounter=window.goatcounter||{}; window.goatcounter.endpoint="https://voxheim.goatcounter.com/count"; const gs=document.createElement("script"); gs.async=true; gs.src="https://gc.zgo.at/count.js"; gs.dataset.goatcounter="https://voxheim.goatcounter.com/count"; document.head.appendChild(gs); }catch(e){} }
+const TRK_Q=[], TRK_S=new Set();
+function trkFlush(){ const g=window.goatcounter; if(!g||typeof g.count!=="function"){ if(!trkFlush.t&&TRK_Q.length) trkFlush.t=setTimeout(()=>{ trkFlush.t=0; trkFlush(); },2000); return; } while(TRK_Q.length){ const n=TRK_Q.shift(); try{ g.count({path:"jogo/"+n,title:n,event:true}); }catch(e){} } }
+function trk(name,once){ if(TRK_OFF) return; try{ if(once){ const k="vx-ev-"+name; if(localStorage.getItem(k)) return; localStorage.setItem(k,"1"); } }catch(e){} TRK_Q.push(name); trkFlush(); }
+function trkSession(name){ if(TRK_S.has(name)) return; TRK_S.add(name); trk(name); }
 /* ---------- voice (recorded, Web Audio; device voice as fallback) ---------- */
 const TTS=("speechSynthesis" in window)&&typeof SpeechSynthesisUtterance!=="undefined";
 function cleanSay(t){ return String(t).replace(/_+/g," ").replace(/\.?\s\/\s/g,". ").replace(/\s+/g," ").trim(); }
@@ -1990,7 +1997,7 @@ function normEn(t){ return String(t).toLowerCase().replace(/[’`]/g,"'").replac
   .replace(/cannot/g,"can not").replace(/[^a-z\s]/g," ").replace(/\s+/g," ").trim().split(" ").filter(Boolean); }
 function lcs(a,b){ const m=a.length,n=b.length,d=Array.from({length:m+1},()=>new Array(n+1).fill(0)); for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) d[i][j]=a[i-1]===b[j-1]?d[i-1][j-1]+1:Math.max(d[i-1][j],d[i][j-1]); return d[m][n]; }
 function simEn(said,exp){ const a=normEn(said), b=normEn(exp); if(!b.length) return 0; const l=lcs(a,b); return Math.min(l/b.length, a.length?l/a.length*1.25:0); }
-function listenOnce(onDone){ let r; try{ r=new SR(); }catch(e){ onDone({err:"unsupported"}); return ()=>{}; }
+function listenOnce(onDone){ trk("microfone-usado",true); const _dn=onDone; onDone=r=>{ if(r&&r.err&&r.err!=="no-speech") trk("microfone-erro-"+r.err,true); _dn(r); }; let r; try{ r=new SR(); }catch(e){ onDone({err:"unsupported"}); return ()=>{}; }
   r.lang="en-US"; r.interimResults=false; r.maxAlternatives=4; let got=false;
   r.onresult=e=>{ got=true; const alts=[...e.results[0]].map(x=>x.transcript); onDone({alts}); };
   r.onerror=e=>{ if(!got){ got=true; onDone({err:e.error||"error"}); } };
@@ -4959,7 +4966,7 @@ function futNextOpp(){ const F=futStore(); if(F.phase==="liga") return futTeams(
 function startMatch(){ const B=futNextOpp(); if(!B) return; chapKey="p3"; BOSSES=CH().bosses; try{localStorage.setItem(LK("vx-chap"),chapKey);}catch(e){} firstDayGate(()=>startBattle(BOSSES.indexOf(B))); }
 function matchEnd(){ const M=G.match, F=futStore(), B=G.B; if(M.ko&&M.gg===M.rg&&!M.pens) return penalties(matchEnd);
   const gg=M.gg, rg=M.rg, pw=M.pens?(M.pens[0]>M.pens[1]):null, won=gg>rg||pw===true, draw=gg===rg&&!M.pens;
-  snapshotBattle(); addChronicle(won||draw); if(won){ progress.cleared[B.id]=true; progress.wins=(progress.wins||0)+1; }
+  snapshotBattle(); addChronicle(won||draw); trk("estadio-partida-"+B.id,true); if(won){ progress.cleared[B.id]=true; progress.wins=(progress.wins||0)+1; }
   let msg="", phaseInfo="";
   if(F.phase==="liga"){ const fx=futFixtures(F.round); futRecord("guild",B.id,gg,rg); F.res.push({r:F.round+1,opp:B.id,gg,rg}); fx.slice(1).forEach(([a,b])=>{ const [x,y]=futSim(a,b); futRecord(a,b,x,y); }); F.round++;
     msg=won?"Vitória! +3 pontos.":draw?"Empate. +1 ponto.":"Derrota. Nenhum ponto.";
@@ -4970,7 +4977,7 @@ function matchEnd(){ const M=G.match, F=futStore(), B=G.B; if(M.ko&&M.gg===M.rg&
   } else if(F.phase==="semi"){ const other=F.ko.semi.find(p=>!p.includes("guild")), ow=futKoWin(other[0],other[1]);
     if(won){ F.phase="final"; F.ko.opp=ow; phaseInfo="A guilda está na FINAL! Adversário: "+futName(ow)+"."; } else { F.phase="fim"; F.ko.out="semi"; phaseInfo="Eliminada na semifinal. "+futName(ow)+" e "+B.name+" fazem a final."; }
     msg=won?"Classificada!":"Eliminada.";
-  } else if(F.phase==="final"){ if(won){ F.phase="campeao"; F.titles=(F.titles||0)+1; phaseInfo="A GUILDA É CAMPEÃ! Título número "+F.titles+"."; } else { F.phase="fim"; F.ko.out="final"; phaseInfo="Vice-campeã. Por pouco!"; } msg=won?"Campeã!":"Vice-campeã."; }
+  } else if(F.phase==="final"){ if(won){ F.phase="campeao"; F.titles=(F.titles||0)+1; trk("estadio-campeao",true); phaseInfo="A GUILDA É CAMPEÃ! Título número "+F.titles+"."; } else { F.phase="fim"; F.ko.out="final"; phaseInfo="Vice-campeã. Por pouco!"; } msg=won?"Campeã!":"Vice-campeã."; }
   saveProgress(); if(won){ burst(70,"#C9A45C"); sfx.win(); } else sfx.lose();
   const score=FUT_GUILD+" "+gg+" × "+rg+" "+futShort(B)+(M.pens?" (pênaltis "+M.pens[0]+" × "+M.pens[1]+")":"");
   setTimeout(()=>openSheet({chip:"Fim de jogo",color:won?"#5CC4B4":draw?"#C9A45C":"#C8464F",who:"Temporada "+F.season,art:bossArt(won),task:score,hint:msg+" "+phaseInfo,
@@ -5199,7 +5206,7 @@ function plBuild(g){ const pool=shuffle(plPool(g)), used=new Set(), take=f=>{ co
   return Q; }
 function plOpenW(W){ const pl=progress.placed|0; if(!pl) return false; const bi=ROUTE.indexOf(W.id); if(W.kind==="book") return bi>=0&&bi<=pl;
   if(W.unlockBell){ const b=ROUTE.findIndex(k=>(BOOKREG[k]||[]).some(R=>R.id===W.unlockBell)); return b>=0&&b<pl; } return false; }
-function openPlacement(){ ac();
+function openPlacement(){ ac(); trk("nivelamento-comecou",true);
   const ov=document.createElement("div"); ov.className="pl-ov"; ov.setAttribute("role","dialog"); ov.setAttribute("aria-modal","true"); ov.setAttribute("aria-label","Prova dos Portões"); document.body.appendChild(ov);
   const names=SOLO?[(NAMES[0]||"").trim()||"Você"]:[...Array(count).keys()].map(i=>(NAMES[i]||"").trim()||("Herói "+(i+1)));
   let g=0, Q=plBuild(0), qi=0, hits=0, turn=0, stopL=null, tries=0, revealed=false, passed=0;
@@ -5245,14 +5252,14 @@ function openPlacement(){ ac();
       ov.querySelector("#pl-on").onclick=()=>{ sfx.card(); g++; Q=plBuild(g); qi=0; hits=0; ask(); }; return; }
     result(); };
   const result=()=>{ g=passed; const start=Math.min(passed,ROUTE.length-1), W=WORLD.find(w=>w.id===ROUTE[start]);
-    progress.placed=Math.max(progress.placed|0,start); saveProgress(); atSel=ROUTE[start]; sfx.card();
+    trk("nivelamento-livro-"+(start+1),true); progress.placed=Math.max(progress.placed|0,start); saveProgress(); atSel=ROUTE[start]; sfx.card();
     const msg=passed===0?"Comece pelo começo: o Livro I vai firmar a base, e ela vai crescer rápido.":passed>=PL_GATES.length?(SOLO?"Você passou":"Vocês passaram")+" por todos os portões. O Livro V, nível C2, é o último: lá cada um encontra a própria voz.":"Os livros anteriores ficam abertos para revisar o que precisar.";
     frame('<div class="pl-res"><span class="tag">Resultado</span><h3 class="display">Comecem no '+esc(PL_GATES[start].bk)+'</h3><p class="pl-world">'+esc(W.n)+' · nível '+esc(W.lvl)+'</p><p class="intro">'+esc(msg)+'</p><button type="button" class="primary" id="pl-enter">Entrar em Voxheim</button></div>');
     ov.querySelector("#pl-enter").onclick=()=>{ close(); $("to-map").click(); }; };
   intro();
 }
 $("pl-open").onclick=()=>{ sfx.pick(); openPlacement(); };
-$("to-map").onclick=()=>{ ac(); if(!sagaSeen()) return openSaga(()=>openAtlas()); sfx.card(); openAtlas(); };
+$("to-map").onclick=()=>{ ac(); trkSession("abriu-o-jogo-"+(SOLO?"solo":"grupo")); trk("jogador-novo-"+(SOLO?"solo":"grupo"),true); if(!sagaSeen()) return openSaga(()=>openAtlas()); sfx.card(); openAtlas(); };
 $("ex-quit").onclick=()=>{ EXP=null; G=null; sfx.pick(); if(CH().isle) openAtlas(); else { paintMap(); show("map"); } };
 $("to-atlas").onclick=()=>{ sfx.card(); openAtlas(); };
 $("atlas-back").onclick=()=>show("setup");
@@ -5681,7 +5688,7 @@ function megaDefeat(){
 let G=null;
 function startBattle(bi){
   preloadChap(chapKey);
-  const B=BOSSES[bi];
+  const B=BOSSES[bi]; trkSession("batalha-comecou"); trk("primeira-batalha",true); trk("batalha-"+chapKey,true);
   G={bi,B,max:bossMaxHp(B),hp:bossMaxHp(B),cor:100,focus:5,timer:B.every,pi:0,nextAtk:B.pattern[0],shield:false,fog:0,allyx2:false,bard:0,over:false,actions:0,
      heroes:[...Array(count).keys()].map(i=>({name:(NAMES[i]||"").trim()||("Herói "+(i+1)),key:hkey((NAMES[i]||"").trim()||("Herói "+(i+1))),start:heroStart[i]||1,learn:{},cls:heroCls[i],charge:0,speaks:0,dmg:0,support:0,defend:0,fails:0,chained:false,selfx2:false})),
      cur:0};
@@ -6374,7 +6381,7 @@ function victory(){
   $("b-wrap").classList.add("dead"); burst(70,G.B.col); setTimeout(()=>burst(50,"#C9A45C"),300); sfx.win();
   if(G.mega){ setTimeout(()=>speak("You are not who you were."),500); return megaVictory(); }
   setTimeout(()=>speak(DEFEAT_LINE),500); progress.wins=(progress.wins||0)+1;
-  progress.cleared[G.B.id]=true; delete progress.weak[G.B.id]; saveProgress(); snapshotBattle(); addChronicle(true); trWin(); lapWin();
+  progress.cleared[G.B.id]=true; delete progress.weak[G.B.id]; saveProgress(); snapshotBattle(); addChronicle(true); trWin(); lapWin(); trk("primeira-vitoria",true); trk("vitoria-"+chapKey+"-"+G.B.id,true);
   const last=G.bi===BOSSES.length-1;
   setTimeout(()=>openSheet({chip:"Vitória",color:"#5CC4B4",who:G.B.act,art:bossArt(true),task:G.B.name+" foi derrotado!",hint:CH().isle?(last?"O "+CH().label.split(" · ")[0]+" é de vocês! A ilha brilha no Atlas.":"O próximo guardião da ilha espera."):chapKey==="c0"?"As primeiras palavras são de vocês. O Capítulo 1 espera a turma.":last?"O último guardião da região caiu. Ouçam: o sino vai tocar.":"O caminho para o próximo ato está aberto.",
     kitHTML:lapResHTML()+trUpHTML()+'<div class="label">Experiência ganha</div>'+xpHTML()+learnHTML()+'<div class="label" style="margin-top:6px">Prêmios da batalha</div>'+awardsHTML(),bindKit:bindLearn,
